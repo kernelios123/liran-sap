@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote } from "lucide-react";
@@ -8,35 +9,35 @@ interface DailyQuoteProps {
 
 const quotes = [
   {
-    text: "Your journal is a place to grow, not to show.",
-    author: "Unknown"
+    text: "The best time to plant a tree was 20 years ago. The second best time is now.",
+    author: "Chinese Proverb"
   }, {
-    text: "The quieter you become, the more you can hear.",
-    author: "Ram Dass"
+    text: "In nature, nothing is perfect and everything is perfect. Trees can be contorted, bent in weird ways, and they're still beautiful.",
+    author: "Alice Walker"
   }, {
-    text: "Write what disturbs you, what you fear, what you have not been willing to speak about.",
-    author: "Natalie Goldberg"
+    text: "Look deep into nature, and then you will understand everything better.",
+    author: "Albert Einstein"
   }, {
-    text: "The habit of writing for my eye is good practice. It loosens the ligaments.",
-    author: "Virginia Woolf"
+    text: "The greatest glory in living lies not in never falling, but in rising every time we fall.",
+    author: "Nelson Mandela"
   }, {
-    text: "Fill your paper with the breathings of your heart.",
-    author: "William Wordsworth"
+    text: "Nature does not hurry, yet everything is accomplished.",
+    author: "Lao Tzu"
   }, {
-    text: "I can shake off everything as I write; my sorrows disappear, my courage is reborn.",
-    author: "Anne Frank"
+    text: "We don't stop playing because we grow old; we grow old because we stop playing.",
+    author: "George Bernard Shaw"
   }, {
-    text: "Journal writing is a voyage to the interior.",
-    author: "Christina Baldwin"
+    text: "Study nature, love nature, stay close to nature. It will never fail you.",
+    author: "Frank Lloyd Wright"
   }, {
-    text: "Writing is medicine. It is an appropriate antidote to injury. It is an appropriate companion for any difficult change.",
-    author: "Julia Cameron"
+    text: "The journey of a thousand miles begins with a single step.",
+    author: "Lao Tzu"
   }, {
-    text: "What would happen if one woman told the truth about her life? The world would split open.",
-    author: "Muriel Rukeyser"
+    text: "Adopt the pace of nature: her secret is patience.",
+    author: "Ralph Waldo Emerson"
   }, {
-    text: "Documenting little details of your everyday life becomes a celebration of who you are.",
-    author: "Carolyn V. Hamilton"
+    text: "Every morning we are born again. What we do today is what matters most.",
+    author: "Buddha"
   }
 ];
 
