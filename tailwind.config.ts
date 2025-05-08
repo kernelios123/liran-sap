@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -71,14 +72,6 @@ export default {
 					'bark': '#795548',
 					'sand': '#D7CCC8',
 					'water': '#29B6F6'
-				},
-				'grove': {
-					'background': '#e9ebde',
-					'sidebar': '#d4dbc3',
-					'card': '#f8f6ed',
-					'text': '#2d3729',
-					'muted': '#888a80',
-					'accent': '#b99d80'
 				}
 			},
 			borderRadius: {
@@ -111,11 +104,9 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out'
 			},
 			fontFamily: {
-				journal: ['Noto Serif', 'serif'],
-				'serif': ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+				journal: ['Noto Serif', 'serif']
 			},
 			backgroundImage: {
-				'leaf-pattern': "url('/lovable-uploads/38e552b1-7814-4b44-9882-b43f18e6cad4.png')",
 				'leaf-pattern': "url('/leaf-pattern.svg')"
 			}
 		}
