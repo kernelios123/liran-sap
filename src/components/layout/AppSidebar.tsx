@@ -19,7 +19,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "h-screen bg-nature-cream sticky top-0 border-r border-nature-sage/20 transition-all duration-300 flex flex-col",
+        "h-screen bg-nature-softgreen sticky top-0 border-r border-nature-sage/20 transition-all duration-300 flex flex-col shadow-md",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -49,8 +49,8 @@ export function AppSidebar() {
                   cn(
                     "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300",
                     isActive
-                      ? "bg-nature-sage/20 text-nature-brown font-medium"
-                      : "text-nature-brown/70 hover:bg-nature-beige hover:text-nature-brown"
+                      ? "bg-white/80 text-nature-brown font-medium shadow-soft"
+                      : "text-nature-brown/70 hover:bg-white/50 hover:text-nature-brown"
                   )
                 }
               >

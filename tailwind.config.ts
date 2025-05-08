@@ -75,7 +75,11 @@ export default {
 					'sage': '#A8B9A7',
 					'beige': '#F5F0E3',
 					'cream': '#FFF9F0',
-					'brown': '#8C6E5D'
+					'brown': '#8C6E5D',
+					'parchment': '#F2ECD8',  // New color for parchment-like background
+					'softgreen': '#E2E8DF',  // New complementary color for sidebar
+					'softpurple': '#E5DEFF', // Alternative complementary color
+					'softblue': '#D3E4FD'    // Alternative complementary color
 				}
 			},
 			borderRadius: {
@@ -123,6 +127,7 @@ export default {
 			},
 			backgroundImage: {
 				'leaf-pattern': "url('/leaf-pattern.svg')",
+				'parchment-leaves': "url('/lovable-uploads/01cbe06a-85f9-488f-b061-ccf3b867ba31.png')",
 				'sage-gradient': 'linear-gradient(to right bottom, #A8B9A7, #d1dbd0)',
 				'cream-gradient': 'linear-gradient(to right bottom, #FFF9F0, #F5F0E3)'
 			},

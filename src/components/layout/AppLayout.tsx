@@ -9,7 +9,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar />
-      <main className="flex-1 p-6 md:p-10 bg-sage-gradient bg-fixed overflow-x-hidden leaf-background">
+      <main className="flex-1 p-6 md:p-10 bg-parchment-leaves bg-cover bg-fixed overflow-x-hidden">
         <div className="container mx-auto">
           {children}
         </div>
