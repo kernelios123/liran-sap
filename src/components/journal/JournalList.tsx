@@ -1,8 +1,8 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MessageSquare, Trash2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { JournalData } from "./JournalEntry";
 import { cn } from "@/lib/utils";
 import {
@@ -28,12 +28,11 @@ export function JournalList({ entries, onSelect, onDelete }: JournalListProps) {
 
   if (entries.length === 0) {
     return (
-      <div className="text-center p-6 bg-white/80 rounded-lg shadow-sm border border-nature-sand/20">
-        <p className="text-muted-foreground">No journal entries yet.</p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Start writing to see your entries here.
-        </p>
-      </div>
+      <Card className="bg-grove-card/90 border-grove-accent/20 shadow-sm rounded-xl">
+        <CardContent className="p-6 text-center">
+          <p className="text-grove-muted">No journal entries yet.</p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -50,73 +49,55 @@ export function JournalList({ entries, onSelect, onDelete }: JournalListProps) {
 
   return (
     <>
-      <Accordion
-        type="single"
-        collapsible
-        className="w-full space-y-4"
-      >
-        {entries.map((entry, index) => (
-          <AccordionItem
-            key={index}
-            value={`entry-${index}`}
-            className={cn(
-              "border border-nature-sand/30 rounded-md overflow-hidden",
-              "bg-white/80 shadow-sm"
-            )}
-          >
-            <AccordionTrigger className="px-4 py-3 hover:bg-secondary/30 transition-colors">
-              <div className="flex justify-between w-full text-left">
-                <span className="font-medium">
-                  {entry.date.toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(entry.date, { addSuffix: true })}
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              {entry.thoughts && (
-                <div className="mb-2">
-                  <h4 className="text-sm font-medium text-nature-forest">Thoughts</h4>
-                  <p className="text-sm text-foreground mt-1">{entry.thoughts}</p>
+      <div className="space-y-3">
+        {entries.length > 0 ? (
+          entries.map((entry, index) => (
+            <Card 
+              key={index}
+              className="bg-grove-card/90 border-grove-accent/20 shadow-sm rounded-xl overflow-hidden"
+            >
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium text-grove-text">
+                    {entry.date.toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <span className="text-xs text-grove-muted">
+                    {formatDistanceToNow(entry.date, { addSuffix: true })}
+                  </span>
                 </div>
-              )}
-              {entry.feelings && (
-                <div className="mb-2">
-                  <h4 className="text-sm font-medium text-nature-forest">Feelings</h4>
-                  <p className="text-sm text-foreground mt-1">{entry.feelings}</p>
+                {entry.thoughts && (
+                  <p className="text-sm text-grove-text line-clamp-2 mb-3">{entry.thoughts}</p>
+                )}
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    className="border-grove-accent/30 text-grove-text hover:bg-grove-accent/10 px-2 h-8"
+                    onClick={() => onSelect(entry)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    <span className="text-xs">AI chat</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-grove-accent/30 text-grove-text hover:bg-grove-accent/10 px-2 h-8"
+                    onClick={() => handleDeleteClick(entry)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
-              {entry.missions && (
-                <div className="mb-2">
-                  <h4 className="text-sm font-medium text-nature-forest">Missions</h4>
-                  <p className="text-sm text-foreground mt-1">{entry.missions}</p>
-                </div>
-              )}
-              <div className="mt-4 flex gap-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 border-nature-forest text-nature-forest hover:bg-nature-forest/10"
-                  onClick={() => onSelect(entry)}
-                >
-                  Continue in AI Chat
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-destructive text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDeleteClick(entry)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="text-center p-6 bg-grove-card rounded-xl">
+            <p className="text-grove-muted">No journal entries yet.</p>
+          </div>
+        )}
+      </div>
 
       <AlertDialog open={!!entryToDelete} onOpenChange={(open) => !open && setEntryToDelete(null)}>
         <AlertDialogContent>

@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Pencil } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { JournalTab } from "./tabs/JournalTab";
@@ -87,50 +86,44 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
   };
 
   return (
-    <Card className="w-full shadow-lg border-[#D4B996]/40 animate-fade-in overflow-hidden backdrop-blur-sm transition-all hover:shadow-xl">
-      <CardHeader className="bg-gradient-to-r from-[#D4B996]/30 to-[#B6C199]/20 rounded-t-md py-6">
-        <CardTitle className="flex items-center gap-3">
-          <Pencil className="h-6 w-6 text-[#B56B45]" />
-          <span className="text-2xl text-[#7D5A50]">New Journal Entry</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-8 pt-6">
+    <Card className="w-full shadow-sm border border-grove-accent/20 bg-grove-card/90 rounded-xl overflow-hidden">
+      <CardContent className="p-6 pt-6">
         <Tabs defaultValue="journal" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6 bg-[#E6DFD9] p-1.5 rounded-md">
+          <TabsList className="grid grid-cols-2 mb-6 bg-grove-background rounded-md">
             <TabsTrigger 
               value="journal"
-              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
+              className="data-[state=active]:bg-white/70 data-[state=active]:text-grove-text py-3 font-medium"
             >
               Journal
             </TabsTrigger>
             <TabsTrigger 
               value="missions"
-              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
+              className="data-[state=active]:bg-white/70 data-[state=active]:text-grove-text py-3 font-medium"
             >
-              Weekly Missions
+              AI chat
             </TabsTrigger>
           </TabsList>
           <TabsContent value="journal" className="mt-0">
-            <JournalTab 
-              journalContent={journalContent}
-              setJournalContent={setJournalContent}
+            <textarea
+              placeholder="Write your thoughts and feelings for today..."
+              className="min-h-[240px] w-full resize-none bg-white/70 border-grove-accent/20 rounded-md p-4 text-grove-text focus:outline-none focus:ring-1 focus:ring-grove-accent/50"
+              value={journalContent}
+              onChange={(e) => setJournalContent(e.target.value)}
             />
           </TabsContent>
           <TabsContent value="missions" className="mt-0">
-            <MissionsTab 
-              missions={missions}
-              setMissions={setMissions}
-              handleMissionsSubmit={handleMissionsSubmit}
-            />
+            <div className="min-h-[240px] bg-white/70 border border-grove-accent/20 rounded-md p-4">
+              AI chat feature will be here
+            </div>
           </TabsContent>
         </Tabs>
       </CardContent>
-      <CardFooter className="flex justify-end bg-gradient-to-r from-[#E6DFD9]/50 to-[#D4B996]/30 py-6 px-8 rounded-b-md">
+      <CardFooter className="flex justify-end bg-grove-background/30 py-4 px-6 rounded-b-xl">
         <Button 
           onClick={handleSave} 
-          className="bg-[#B56B45] hover:bg-[#C87C56] shadow-md transition-all hover:translate-y-[-2px] text-white font-medium px-6 py-5 text-base"
+          className="bg-grove-accent hover:bg-grove-accent/90 text-white font-medium px-6"
         >
-          Save Entry
+          New Entry
         </Button>
       </CardFooter>
     </Card>
