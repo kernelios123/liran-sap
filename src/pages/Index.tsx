@@ -5,11 +5,13 @@ import { JournalList } from "@/components/journal/JournalList";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Leaf } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const JournalPage = () => {
   const [entries, setEntries] = useState<JournalData[]>([]);
   const [currentDate] = useState<Date>(new Date());
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Load entries from localStorage on component mount
   useEffect(() => {
@@ -33,6 +35,27 @@ const JournalPage = () => {
 
   const handleSaveEntry = (data: JournalData) => {
     setEntries((prev) => [data, ...prev]);
+    toast({
+      title: "Entry saved",
+      description: "Your journal entry has been saved successfully.",
+    });
+  };
+
+  const handleDeleteEntry = (entryToDelete: JournalData) => {
+    setEntries((prev) => 
+      prev.filter((entry) => 
+        // Compare by date timestamp since dates are objects
+        entry.date.getTime() !== entryToDelete.date.getTime() ||
+        entry.thoughts !== entryToDelete.thoughts ||
+        entry.feelings !== entryToDelete.feelings ||
+        entry.missions !== entryToDelete.missions
+      )
+    );
+    toast({
+      title: "Entry deleted",
+      description: "Your journal entry has been deleted.",
+      variant: "destructive",
+    });
   };
 
   const handleSelectEntry = (entry: JournalData) => {
@@ -72,7 +95,11 @@ const JournalPage = () => {
             <h2 className="text-2xl font-semibold mb-4 text-[#7D5A50]">
               Previous Entries
             </h2>
-            <JournalList entries={entries} onSelect={handleSelectEntry} />
+            <JournalList 
+              entries={entries} 
+              onSelect={handleSelectEntry} 
+              onDelete={handleDeleteEntry}
+            />
           </div>
         </div>
       </div>
