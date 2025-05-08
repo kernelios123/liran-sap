@@ -22,15 +22,14 @@ export type JournalData = {
 };
 
 export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
-  const [thoughts, setThoughts] = useState("");
-  const [feelings, setFeelings] = useState("");
+  const [journalContent, setJournalContent] = useState("");
   const [missions, setMissions] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSave = () => {
     // Don't require content if only missions were entered
-    if (!thoughts && !feelings && !missions) {
+    if (!journalContent && !missions) {
       toast({
         title: "Empty Entry",
         description: "Please write something before saving",
@@ -39,13 +38,13 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
       return;
     }
 
-    // Only save journal entry if there are thoughts or feelings
-    if (thoughts || feelings) {
+    // Only save journal entry if there is content
+    if (journalContent) {
       // Save the entry without missions (they go to tasks)
       const journalData = {
         date: currentDate,
-        thoughts,
-        feelings,
+        thoughts: journalContent, // Save all content as thoughts
+        feelings: "", // No longer using separate feelings field
         missions: "", // Don't save missions in journal entries
       };
       
@@ -61,9 +60,8 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
         ),
       });
       
-      // Clear thoughts and feelings after saving
-      setThoughts("");
-      setFeelings("");
+      // Clear journal content after saving
+      setJournalContent("");
     }
 
     // Process missions separately if provided
@@ -142,19 +140,13 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-8 pt-6">
-        <Tabs defaultValue="thoughts" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6 bg-[#E6DFD9] p-1.5 rounded-md">
+        <Tabs defaultValue="journal" className="w-full">
+          <TabsList className="grid grid-cols-2 mb-6 bg-[#E6DFD9] p-1.5 rounded-md">
             <TabsTrigger 
-              value="thoughts"
+              value="journal"
               className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
             >
-              Thoughts
-            </TabsTrigger>
-            <TabsTrigger 
-              value="feelings"
-              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
-            >
-              Feelings
+              Journal
             </TabsTrigger>
             <TabsTrigger 
               value="missions"
@@ -163,26 +155,15 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
               Weekly Missions
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="thoughts" className="mt-0">
+          <TabsContent value="journal" className="mt-0">
             <Textarea
-              placeholder="Write your thoughts for today..."
+              placeholder="Write your thoughts and feelings for today..."
               className={cn(
                 "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
                 "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
               )}
-              value={thoughts}
-              onChange={(e) => setThoughts(e.target.value)}
-            />
-          </TabsContent>
-          <TabsContent value="feelings" className="mt-0">
-            <Textarea
-              placeholder="How are you feeling today?"
-              className={cn(
-                "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
-                "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
-              )}
-              value={feelings}
-              onChange={(e) => setFeelings(e.target.value)}
+              value={journalContent}
+              onChange={(e) => setJournalContent(e.target.value)}
             />
           </TabsContent>
           <TabsContent value="missions" className="mt-0">

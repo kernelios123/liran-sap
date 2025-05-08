@@ -1,13 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListTodo, Save, CheckCheck } from "lucide-react";
+import { ListTodo, Save, CheckCheck, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface Task {
   id: string;
@@ -68,6 +69,19 @@ const TasksPage = () => {
     });
   };
 
+  const deleteTask = (taskId: string) => {
+    setTasks(prevTasks => {
+      const updatedTasks = prevTasks.filter(task => task.id !== taskId);
+      localStorage.setItem("journal-tasks", JSON.stringify(updatedTasks));
+      return updatedTasks;
+    });
+    
+    toast({
+      title: "Task Deleted",
+      description: "The task has been removed",
+    });
+  };
+
   // Separate tasks into active and completed
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
@@ -116,14 +130,6 @@ const TasksPage = () => {
               <ListTodo className="h-8 w-8 text-[#B56B45]" />
               Weekly Missions
             </h1>
-            {completedTasks.length > 0 && (
-              <button
-                onClick={handleClearCompleted}
-                className="text-sm text-[#B56B45] hover:text-[#C87C56] transition-colors"
-              >
-                Clear Completed
-              </button>
-            )}
           </div>
           <p className="text-lg text-[#886F68] mt-2">
             Track your weekly goals and missions from your journal entries
@@ -197,10 +203,41 @@ const TasksPage = () => {
           {/* Completed Missions Section */}
           {completedTasks.length > 0 && (
             <div className="mt-10">
-              <h2 className="text-2xl font-semibold text-[#7D5A50] flex items-center gap-3 mb-4">
-                <CheckCheck className="h-6 w-6 text-[#6A994E]" />
-                Completed Missions
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold text-[#7D5A50] flex items-center gap-3">
+                  <CheckCheck className="h-6 w-6 text-[#6A994E]" />
+                  Completed Missions
+                </h2>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="text-sm border-[#B56B45] text-[#B56B45] hover:bg-[#B56B45]/10 hover:text-[#B56B45]"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Clear All
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete all your completed missions. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleClearCompleted}
+                        className="bg-[#B56B45] hover:bg-[#C87C56]"
+                      >
+                        Delete All
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
               
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="completed-tasks" className="border-[#D4B996]/40 shadow-md overflow-hidden bg-white rounded-md">
@@ -217,7 +254,7 @@ const TasksPage = () => {
                       <ScrollArea className="h-full max-h-[300px]">
                         <ul className="space-y-3">
                           {completedTasks.map((task) => (
-                            <li key={task.id} className="flex items-start gap-3 p-2 hover:bg-[#F7F3EE] rounded-md transition-colors">
+                            <li key={task.id} className="flex items-center gap-3 p-2 hover:bg-[#F7F3EE] rounded-md transition-colors">
                               <Checkbox
                                 id={`completed-${task.id}`}
                                 checked={task.completed}
@@ -230,6 +267,15 @@ const TasksPage = () => {
                               >
                                 {task.text}
                               </label>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => deleteTask(task.id)}
+                                className="h-8 w-8 text-[#B56B45] hover:text-[#C87C56] hover:bg-[#F7F3EE]"
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Delete task</span>
+                              </Button>
                             </li>
                           ))}
                         </ul>
