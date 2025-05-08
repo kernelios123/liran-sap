@@ -53,8 +53,8 @@ export function DailyQuote({
   return <Card className={cn("border-0 bg-white rounded-lg shadow-sm max-w-3xl w-full mx-auto", className)}>
       <CardContent className="py-8 px-8 md:px-12">
         <div className="flex flex-col text-center">
-          <div className="text-nature-forest text-3xl mb-4 font-serif my-0 py-0">❝</div>
-          <p className="text-lg md:text-xl text-nature-forest font-light mb-4">{quote.text}</p>
+          <div className="text-nature-forest text-3xl mb-4 font-serif my-0 py-0 rounded-sm">❝</div>
+          <p className="text-lg text-nature-forest font-light mb-4 py-0 my-0 md:text-xl">{quote.text}</p>
           <div className="flex items-center justify-center">
             <div className="h-px w-12 bg-nature-sand/50 mr-3"></div>
             <p className="text-sm text-muted-foreground">— {quote.author}</p>
