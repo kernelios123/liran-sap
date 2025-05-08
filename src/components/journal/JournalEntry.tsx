@@ -1,13 +1,14 @@
 
 import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Pencil, ListTodo } from "lucide-react";
+import { Leaf, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { JournalTab } from "./tabs/JournalTab";
+import { MissionsTab } from "./tabs/MissionsTab";
+import { processMissionsAsTasks } from "./TaskProcessor";
 
 type JournalEntryProps = {
   onSave: (data: JournalData) => void;
@@ -66,57 +67,11 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
 
     // Process missions separately if provided
     if (missions && missions.trim() !== "") {
-      processMissionsAsTasks(missions, currentDate);
+      processMissionsAsTasks(missions, currentDate, navigate);
       setMissions(""); // Clear missions after processing
     }
   };
   
-  const processMissionsAsTasks = (missionText: string, date: Date) => {
-    // Check if there are missions to process
-    if (!missionText || missionText.trim() === "") return;
-    
-    // Get existing tasks
-    const savedTasks = localStorage.getItem("journal-tasks");
-    let existingTasks = savedTasks ? JSON.parse(savedTasks) : [];
-    
-    // Process missions into tasks
-    const missionLines = missionText
-      .split("\n")
-      .filter(line => line.trim() !== "");
-    
-    const newTasks = missionLines.map(line => ({
-      id: `${date.getTime()}-${Math.random().toString(36).substr(2, 9)}`,
-      text: line.trim(),
-      completed: false,
-      date: date,
-    }));
-    
-    // Add only new tasks (avoid duplicates)
-    const allTasks = [...existingTasks];
-    
-    newTasks.forEach(newTask => {
-      const isDuplicate = existingTasks.some((existingTask: any) => 
-        existingTask.text === newTask.text
-      );
-      
-      if (!isDuplicate) {
-        allTasks.push(newTask);
-      }
-    });
-    
-    // Save back to localStorage
-    localStorage.setItem("journal-tasks", JSON.stringify(allTasks));
-    
-    // Show notification and navigate to tasks page
-    if (newTasks.length > 0) {
-      toast({
-        title: "Tasks Created",
-        description: `${newTasks.length} mission${newTasks.length > 1 ? 's' : ''} added to your tasks list`,
-      });
-      navigate("/tasks");
-    }
-  };
-
   const handleMissionsSubmit = () => {
     if (!missions || missions.trim() === "") {
       toast({
@@ -127,7 +82,7 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
       return;
     }
 
-    processMissionsAsTasks(missions, currentDate);
+    processMissionsAsTasks(missions, currentDate, navigate);
     setMissions("");
   };
 
@@ -156,33 +111,17 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="journal" className="mt-0">
-            <Textarea
-              placeholder="Write your thoughts and feelings for today..."
-              className={cn(
-                "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
-                "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
-              )}
-              value={journalContent}
-              onChange={(e) => setJournalContent(e.target.value)}
+            <JournalTab 
+              journalContent={journalContent}
+              setJournalContent={setJournalContent}
             />
           </TabsContent>
           <TabsContent value="missions" className="mt-0">
-            <Textarea
-              placeholder="What are your missions for this week? Add one mission per line to create tasks automatically."
-              className={cn(
-                "min-h-[280px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
-                "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
-              )}
-              value={missions}
-              onChange={(e) => setMissions(e.target.value)}
+            <MissionsTab 
+              missions={missions}
+              setMissions={setMissions}
+              handleMissionsSubmit={handleMissionsSubmit}
             />
-            <Button 
-              onClick={handleMissionsSubmit} 
-              className="mt-4 bg-[#B56B45] hover:bg-[#C87C56] shadow-md transition-all hover:translate-y-[-2px] text-white font-medium px-6 py-5 text-base flex items-center gap-2"
-            >
-              <ListTodo className="h-5 w-5" />
-              Add to Tasks
-            </Button>
           </TabsContent>
         </Tabs>
       </CardContent>
