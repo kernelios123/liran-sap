@@ -47,8 +47,8 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
       title: "Entry Saved",
       description: "Your journal entry has been saved",
       action: (
-        <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center">
-          <Leaf className="h-4 w-4 text-nature-leaf" />
+        <div className="h-8 w-8 bg-[#D4B996]/20 rounded-full flex items-center justify-center">
+          <Leaf className="h-4 w-4 text-[#B56B45]" />
         </div>
       ),
     });
@@ -60,31 +60,31 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
   };
 
   return (
-    <Card className="w-full shadow-md border-nature-sand/30 animate-fade-in backdrop-blur-sm overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-nature-moss/20 to-nature-sky/10 rounded-t-md py-5">
-        <CardTitle className="flex items-center gap-2">
-          <Pencil className="h-5 w-5 text-nature-forest" />
-          <span className="text-2xl text-nature-forest">New Journal Entry</span>
+    <Card className="w-full shadow-lg border-[#D4B996]/40 animate-fade-in overflow-hidden backdrop-blur-sm transition-all hover:shadow-xl">
+      <CardHeader className="bg-gradient-to-r from-[#D4B996]/30 to-[#B6C199]/20 rounded-t-md py-6">
+        <CardTitle className="flex items-center gap-3">
+          <Pencil className="h-6 w-6 text-[#B56B45]" />
+          <span className="text-2xl text-[#7D5A50]">New Journal Entry</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-8 pt-6">
         <Tabs defaultValue="thoughts" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6 bg-nature-sand/10 p-1 rounded-md">
+          <TabsList className="grid grid-cols-3 mb-6 bg-[#E6DFD9] p-1.5 rounded-md">
             <TabsTrigger 
               value="thoughts"
-              className="data-[state=active]:bg-white data-[state=active]:text-nature-forest data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
             >
               Thoughts
             </TabsTrigger>
             <TabsTrigger 
               value="feelings"
-              className="data-[state=active]:bg-white data-[state=active]:text-nature-forest data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
             >
               Feelings
             </TabsTrigger>
             <TabsTrigger 
               value="missions"
-              className="data-[state=active]:bg-white data-[state=active]:text-nature-forest data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
             >
               Weekly Missions
             </TabsTrigger>
@@ -93,8 +93,8 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
             <Textarea
               placeholder="Write your thoughts for today..."
               className={cn(
-                "min-h-[280px] resize-none focus-visible:ring-nature-leaf text-base",
-                "bg-white/50 border-nature-sand/30 shadow-inner"
+                "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
+                "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
               )}
               value={thoughts}
               onChange={(e) => setThoughts(e.target.value)}
@@ -104,8 +104,8 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
             <Textarea
               placeholder="How are you feeling today?"
               className={cn(
-                "min-h-[280px] resize-none focus-visible:ring-nature-leaf text-base",
-                "bg-white/50 border-nature-sand/30 shadow-inner"
+                "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
+                "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
               )}
               value={feelings}
               onChange={(e) => setFeelings(e.target.value)}
@@ -115,8 +115,8 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
             <Textarea
               placeholder="What are your missions for this week?"
               className={cn(
-                "min-h-[280px] resize-none focus-visible:ring-nature-leaf text-base",
-                "bg-white/50 border-nature-sand/30 shadow-inner"
+                "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
+                "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
               )}
               value={missions}
               onChange={(e) => setMissions(e.target.value)}
@@ -124,10 +124,10 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
           </TabsContent>
         </Tabs>
       </CardContent>
-      <CardFooter className="flex justify-end bg-gradient-to-r from-nature-sand/10 to-nature-sky/5 py-4 px-8 rounded-b-md">
+      <CardFooter className="flex justify-end bg-gradient-to-r from-[#E6DFD9]/50 to-[#D4B996]/30 py-6 px-8 rounded-b-md">
         <Button 
           onClick={handleSave} 
-          className="bg-nature-forest hover:bg-nature-forest/90 shadow-md transition-all hover:translate-y-[-1px] text-white font-medium px-5"
+          className="bg-[#B56B45] hover:bg-[#C87C56] shadow-md transition-all hover:translate-y-[-2px] text-white font-medium px-6 py-5 text-base"
         >
           Save Entry
         </Button>

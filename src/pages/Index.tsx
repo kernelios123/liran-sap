@@ -46,30 +46,30 @@ const JournalPage = () => {
       <div className="max-w-7xl mx-auto">
         <header className="mb-10 text-center">
           <div className="inline-flex items-center gap-3 mb-3">
-            <Leaf className="h-7 w-7 text-nature-leaf animate-leaf-sway" />
-            <h1 className="text-4xl font-semibold text-nature-forest">
+            <Leaf className="h-8 w-8 text-[#B56B45] animate-leaf-sway" />
+            <h1 className="text-4xl md:text-5xl font-semibold text-[#7D5A50]">
               Whispering Grove Journal
             </h1>
-            <Leaf className="h-7 w-7 text-nature-leaf animate-leaf-sway" />
+            <Leaf className="h-8 w-8 text-[#B56B45] animate-leaf-sway" />
           </div>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-[#886F68]">
             A peaceful place to capture your thoughts, feelings, and weekly missions
           </p>
         </header>
         
-        <div className="grid gap-10 lg:grid-cols-[1.6fr,1fr] items-start">
+        <div className="grid gap-10 lg:grid-cols-[2fr,1fr] items-start">
           <div className="w-full">
-            <h2 className="text-2xl font-semibold mb-4 text-nature-forest flex items-center gap-2">
+            <h2 className="text-2xl font-semibold mb-4 text-[#7D5A50] flex items-center gap-2">
               <span>New Entry</span>
-              <div className="h-1 w-1 rounded-full bg-nature-leaf"></div>
-              <span className="text-sm font-normal text-muted-foreground">
+              <div className="h-1 w-1 rounded-full bg-[#B56B45]"></div>
+              <span className="text-sm font-normal text-[#886F68]">
                 {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
             </h2>
             <JournalEntry onSave={handleSaveEntry} currentDate={currentDate} />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-nature-forest">
+            <h2 className="text-2xl font-semibold mb-4 text-[#7D5A50]">
               Previous Entries
             </h2>
             <JournalList entries={entries} onSelect={handleSelectEntry} />
