@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Leaf } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DailyQuote } from "@/components/journal/DailyQuote";
 
 const JournalPage = () => {
   const [entries, setEntries] = useState<JournalData[]>([]);
@@ -79,6 +80,8 @@ const JournalPage = () => {
             A peaceful place to capture your thoughts, feelings, and weekly missions
           </p>
         </header>
+        
+        <DailyQuote className="mb-8" />
         
         <div className="grid gap-10 lg:grid-cols-[2fr,1fr] items-start">
           <div className="w-full">

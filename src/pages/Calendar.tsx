@@ -50,7 +50,7 @@ const CalendarPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full max-w-6xl mx-auto">
         <header className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-3">
             <CalendarIcon className="h-6 w-6 text-nature-forest" />
@@ -63,17 +63,17 @@ const CalendarPage = () => {
           </p>
         </header>
         
-        <div className="grid gap-8 md:grid-cols-[1fr,1fr]">
-          <Card className="shadow-md border-nature-sand/30">
+        <div className="grid gap-8 md:grid-cols-[1.5fr,1fr]">
+          <Card className="shadow-md border-nature-sand/30 h-full">
             <CardHeader className="pb-2">
               <CardTitle className="text-nature-forest">Your Journal Calendar</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col items-center">
               <CalendarComponent
                 mode="single"
                 selected={date}
                 onSelect={setDate}
-                className="border rounded-md p-3"
+                className="border rounded-md p-3 w-full max-w-md"
                 modifiers={{
                   hasEntry: (day) => entryDates.has(format(day, "yyyy-MM-dd")),
                 }}
@@ -95,7 +95,7 @@ const CalendarPage = () => {
           </Card>
           
           <Card className={cn(
-            "shadow-md border-nature-sand/30",
+            "shadow-md border-nature-sand/30 h-full",
             selectedDateEntry ? "bg-white/90" : "bg-white/50"
           )}>
             <CardHeader className="pb-2">
