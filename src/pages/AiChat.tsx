@@ -24,6 +24,22 @@ const AiChatPage = () => {
     }
   }, []);
 
+  // Helper function to safely render missions content
+  const renderMissions = (missions: string | string[] | undefined) => {
+    if (!missions) return "";
+    
+    if (typeof missions === 'string') {
+      return missions.substring(0, 100) + (missions.length > 100 ? "..." : "");
+    }
+    
+    if (Array.isArray(missions)) {
+      const missionsText = missions.join(", ");
+      return missionsText.substring(0, 100) + (missionsText.length > 100 ? "..." : "");
+    }
+    
+    return "";
+  };
+
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto">
@@ -61,13 +77,7 @@ const AiChatPage = () => {
                 )}
                 {selectedEntry.missions && (
                   <p className="text-sm">
-                    <span className="font-medium">Missions:</span> {
-                      typeof selectedEntry.missions === 'string' 
-                        ? selectedEntry.missions.substring(0, 100) + (selectedEntry.missions.length > 100 ? "..." : "") 
-                        : Array.isArray(selectedEntry.missions) 
-                          ? selectedEntry.missions.join(", ").substring(0, 100) + (selectedEntry.missions.join(", ").length > 100 ? "..." : "")
-                          : ""
-                    }
+                    <span className="font-medium">Missions:</span> {renderMissions(selectedEntry.missions)}
                   </p>
                 )}
               </CardContent>
