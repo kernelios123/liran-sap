@@ -43,27 +43,33 @@ const JournalPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <Leaf className="h-6 w-6 text-nature-leaf animate-leaf-sway" />
-            <h1 className="text-3xl font-semibold text-nature-forest">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-10 text-center">
+          <div className="inline-flex items-center gap-3 mb-3">
+            <Leaf className="h-7 w-7 text-nature-leaf animate-leaf-sway" />
+            <h1 className="text-4xl font-semibold text-nature-forest">
               Whispering Grove Journal
             </h1>
-            <Leaf className="h-6 w-6 text-nature-leaf animate-leaf-sway" />
+            <Leaf className="h-7 w-7 text-nature-leaf animate-leaf-sway" />
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             A peaceful place to capture your thoughts, feelings, and weekly missions
           </p>
         </header>
         
-        <div className="grid gap-8 md:grid-cols-[1fr,1fr]">
-          <div>
-            <h2 className="text-xl font-semibold mb-4 text-nature-forest">New Entry</h2>
+        <div className="grid gap-10 lg:grid-cols-[1.6fr,1fr] items-start">
+          <div className="w-full">
+            <h2 className="text-2xl font-semibold mb-4 text-nature-forest flex items-center gap-2">
+              <span>New Entry</span>
+              <div className="h-1 w-1 rounded-full bg-nature-leaf"></div>
+              <span className="text-sm font-normal text-muted-foreground">
+                {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+            </h2>
             <JournalEntry onSave={handleSaveEntry} currentDate={currentDate} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-nature-forest">
+            <h2 className="text-2xl font-semibold mb-4 text-nature-forest">
               Previous Entries
             </h2>
             <JournalList entries={entries} onSelect={handleSelectEntry} />
