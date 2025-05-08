@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useState, useEffect } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -8,48 +7,40 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
 const CalendarPage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [entries, setEntries] = useState<JournalData[]>([]);
   const [entryDates, setEntryDates] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
-  
+
   // Load entries from localStorage on component mount
   useEffect(() => {
     const savedEntries = localStorage.getItem("journal-entries");
     if (savedEntries) {
-      const parsedEntries: JournalData[] = JSON.parse(savedEntries).map(
-        (entry: any) => ({
-          ...entry,
-          date: new Date(entry.date),
-        })
-      );
+      const parsedEntries: JournalData[] = JSON.parse(savedEntries).map((entry: any) => ({
+        ...entry,
+        date: new Date(entry.date)
+      }));
       setEntries(parsedEntries);
-      
+
       // Create a set of date strings for days with entries
       const dates = new Set<string>();
-      parsedEntries.forEach((entry) => {
+      parsedEntries.forEach(entry => {
         dates.add(format(new Date(entry.date), "yyyy-MM-dd"));
       });
       setEntryDates(dates);
     }
   }, []);
-  
+
   // Find entry for selected date
-  const selectedDateEntry = entries.find(
-    (entry) => format(new Date(entry.date), "yyyy-MM-dd") === (date ? format(date, "yyyy-MM-dd") : "")
-  );
-  
+  const selectedDateEntry = entries.find(entry => format(new Date(entry.date), "yyyy-MM-dd") === (date ? format(date, "yyyy-MM-dd") : ""));
   const handleViewInChat = () => {
     if (selectedDateEntry) {
       sessionStorage.setItem("selected-entry", JSON.stringify(selectedDateEntry));
       navigate("/ai-chat");
     }
   };
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="w-full max-w-6xl mx-auto">
         <header className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-3">
@@ -69,18 +60,11 @@ const CalendarPage = () => {
               <CardTitle className="text-nature-forest">Your Journal Calendar</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="border rounded-md p-3 w-full max-w-md"
-                modifiers={{
-                  hasEntry: (day) => entryDates.has(format(day, "yyyy-MM-dd")),
-                }}
-                modifiersClassNames={{
-                  hasEntry: "bg-nature-leaf/20 font-medium text-nature-forest",
-                }}
-              />
+              <CalendarComponent mode="single" selected={date} onSelect={setDate} modifiers={{
+              hasEntry: day => entryDates.has(format(day, "yyyy-MM-dd"))
+            }} modifiersClassNames={{
+              hasEntry: "bg-nature-leaf/20 font-medium text-nature-forest"
+            }} className="border rounded-md p-3 w-full max-w-md py-0" />
               <div className="flex items-center justify-center gap-4 mt-4 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-nature-leaf/20"></div>
@@ -94,54 +78,36 @@ const CalendarPage = () => {
             </CardContent>
           </Card>
           
-          <Card className={cn(
-            "shadow-md border-nature-sand/30 h-full",
-            selectedDateEntry ? "bg-white/90" : "bg-white/50"
-          )}>
+          <Card className={cn("shadow-md border-nature-sand/30 h-full", selectedDateEntry ? "bg-white/90" : "bg-white/50")}>
             <CardHeader className="pb-2">
               <CardTitle className="text-nature-forest">
                 {date ? format(date, "MMMM d, yyyy") : "Select a Date"}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {selectedDateEntry ? (
-                <div className="space-y-4">
-                  {selectedDateEntry.thoughts && (
-                    <div>
+              {selectedDateEntry ? <div className="space-y-4">
+                  {selectedDateEntry.thoughts && <div>
                       <h3 className="font-medium mb-1">Thoughts</h3>
                       <p className="text-sm">{selectedDateEntry.thoughts}</p>
-                    </div>
-                  )}
-                  {selectedDateEntry.feelings && (
-                    <div>
+                    </div>}
+                  {selectedDateEntry.feelings && <div>
                       <h3 className="font-medium mb-1">Feelings</h3>
                       <p className="text-sm">{selectedDateEntry.feelings}</p>
-                    </div>
-                  )}
-                  {selectedDateEntry.missions && (
-                    <div>
+                    </div>}
+                  {selectedDateEntry.missions && <div>
                       <h3 className="font-medium mb-1">Weekly Missions</h3>
                       <p className="text-sm">{selectedDateEntry.missions}</p>
-                    </div>
-                  )}
-                  <button
-                    onClick={handleViewInChat}
-                    className="text-sm mt-4 text-nature-forest underline underline-offset-4 hover:text-nature-forest/80"
-                  >
+                    </div>}
+                  <button onClick={handleViewInChat} className="text-sm mt-4 text-nature-forest underline underline-offset-4 hover:text-nature-forest/80">
                     Discuss this entry with AI Grove Guide
                   </button>
-                </div>
-              ) : (
-                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                </div> : <div className="h-[200px] flex items-center justify-center text-muted-foreground">
                   {date ? "No journal entry for this date" : "Select a date to view entries"}
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 };
-
 export default CalendarPage;
