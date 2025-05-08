@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -47,8 +46,9 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
     onSave(journalData);
     
     // Process missions for tasks if missions are provided
+    // We'll handle this in a separate step, not directly in the onSave
     if (missions && missions.trim() !== "") {
-      processMissionsAsTasks(journalData);
+      processMissionsAsTasks(missions, currentDate);
     }
 
     toast({
@@ -67,30 +67,24 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
     setMissions("");
   };
   
-  const processMissionsAsTasks = (entry: JournalData) => {
+  const processMissionsAsTasks = (missionText: string, date: Date) => {
     // Check if there are missions to process
-    if (!entry.missions || entry.missions.trim() === "") return;
+    if (!missionText || missionText.trim() === "") return;
     
     // Get existing tasks
     const savedTasks = localStorage.getItem("journal-tasks");
     let existingTasks = savedTasks ? JSON.parse(savedTasks) : [];
     
-    // Convert existingTasks dates from string to Date objects for comparison
-    existingTasks = existingTasks.map((task: any) => ({
-      ...task,
-      date: new Date(task.date),
-    }));
-    
     // Process missions into tasks
-    const missionLines = entry.missions
+    const missionLines = missionText
       .split("\n")
       .filter(line => line.trim() !== "");
     
     const newTasks = missionLines.map(line => ({
-      id: `${entry.date.getTime()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${date.getTime()}-${Math.random().toString(36).substr(2, 9)}`,
       text: line.trim(),
       completed: false,
-      date: new Date(entry.date),
+      date: date,
     }));
     
     // Add only new tasks (avoid duplicates)

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ListTodo } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { JournalData } from "@/components/journal/JournalEntry";
 
 interface Task {
   id: string;
@@ -23,63 +21,38 @@ const TasksPage = () => {
     const loadTasks = () => {
       const savedTasks = localStorage.getItem("journal-tasks");
       if (savedTasks) {
-        const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
-          ...task,
-          date: new Date(task.date),
-        }));
-        setTasks(parsedTasks);
-      }
-    };
-
-    // Extract tasks from journal entries if not already loaded
-    const extractTasksFromEntries = () => {
-      const savedEntries = localStorage.getItem("journal-entries");
-      if (!savedEntries) return;
-
-      const parsedEntries: JournalData[] = JSON.parse(savedEntries).map(
-        (entry: any) => ({
-          ...entry,
-          date: new Date(entry.date),
-        })
-      );
-
-      // Process each entry's missions
-      const newTasks: Task[] = [];
-      parsedEntries.forEach(entry => {
-        if (!entry.missions || entry.missions.trim() === "") return;
-        
-        // Split missions by new line and create tasks
-        const missionLines = entry.missions
-          .split("\n")
-          .filter(line => line.trim() !== "");
-        
-        missionLines.forEach(line => {
-          // Check if this task already exists in current tasks
-          const taskExists = tasks.some(task => task.text === line.trim());
+        try {
+          const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
+            ...task,
+            date: new Date(task.date),
+          }));
           
-          if (!taskExists) {
-            newTasks.push({
-              id: `${entry.date.getTime()}-${Math.random().toString(36).substr(2, 9)}`,
-              text: line.trim(),
-              completed: false,
-              date: new Date(entry.date),
-            });
-          }
-        });
-      });
-
-      if (newTasks.length > 0) {
-        setTasks(prevTasks => {
-          const updatedTasks = [...prevTasks, ...newTasks];
-          localStorage.setItem("journal-tasks", JSON.stringify(updatedTasks));
-          return updatedTasks;
-        });
+          // Remove any potential duplicates before setting state
+          const uniqueTasks = removeDuplicateTasks(parsedTasks);
+          setTasks(uniqueTasks);
+        } catch (error) {
+          console.error("Error parsing tasks:", error);
+          setTasks([]);
+        }
       }
     };
 
     loadTasks();
-    extractTasksFromEntries();
   }, []);
+
+  // Helper function to remove duplicate tasks based on text content
+  const removeDuplicateTasks = (taskList: Task[]): Task[] => {
+    const uniqueMap = new Map();
+    
+    // Keep only the first occurrence of each task text
+    taskList.forEach(task => {
+      if (!uniqueMap.has(task.text)) {
+        uniqueMap.set(task.text, task);
+      }
+    });
+    
+    return Array.from(uniqueMap.values());
+  };
 
   const toggleTask = (taskId: string) => {
     setTasks(prevTasks => {
