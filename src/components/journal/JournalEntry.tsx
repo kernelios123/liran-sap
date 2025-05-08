@@ -94,7 +94,7 @@ export function JournalEntry({
             <TabsTrigger value="journal" className="data-[state=active]:active-tab soft-tab py-2.5 font-medium">
               Journal
             </TabsTrigger>
-            <TabsTrigger value="missions" className="data-[state=active]:active-tab soft-tab py-2.5">
+            <TabsTrigger value="missions" className="data-[state=active]:active-tab soft-tab py-2.5 font-medium">
               Weekly Missions
             </TabsTrigger>
           </TabsList>
