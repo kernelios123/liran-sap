@@ -1,21 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListTodo, Save, CheckCheck, Trash2, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ListTodo, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
-interface Task {
-  id: string;
-  text: string;
-  completed: boolean;
-  date: Date;
-}
+import { Task, removeDuplicateTasks, groupTasksByWeek, formatWeeklyTasks } from "@/utils/taskUtils";
+import { ActiveTasksSection } from "@/components/tasks/ActiveTasksSection";
+import { CompletedTasksSection } from "@/components/tasks/CompletedTasksSection";
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -45,20 +35,6 @@ const TasksPage = () => {
     loadTasks();
   }, []);
 
-  // Helper function to remove duplicate tasks based on text content
-  const removeDuplicateTasks = (taskList: Task[]): Task[] => {
-    const uniqueMap = new Map();
-    
-    // Keep only the first occurrence of each task text
-    taskList.forEach(task => {
-      if (!uniqueMap.has(task.text)) {
-        uniqueMap.set(task.text, task);
-      }
-    });
-    
-    return Array.from(uniqueMap.values());
-  };
-
   const toggleTask = (taskId: string) => {
     setTasks(prevTasks => {
       const updatedTasks = prevTasks.map(task =>
@@ -82,29 +58,6 @@ const TasksPage = () => {
     });
   };
 
-  // Separate tasks into active and completed
-  const activeTasks = tasks.filter(task => !task.completed);
-  const completedTasks = tasks.filter(task => task.completed);
-
-  // Group active tasks by the week they were created
-  const groupTasksByWeek = (taskList: Task[]) => {
-    const groupedTasks: { [weekKey: string]: Task[] } = {};
-    
-    taskList.forEach(task => {
-      const taskDate = new Date(task.date);
-      const startOfWeek = new Date(taskDate);
-      startOfWeek.setDate(taskDate.getDate() - taskDate.getDay()); // Go to the start of the week (Sunday)
-      const weekKey = startOfWeek.toISOString().split('T')[0];
-      
-      if (!groupedTasks[weekKey]) {
-        groupedTasks[weekKey] = [];
-      }
-      groupedTasks[weekKey].push(task);
-    });
-    
-    return groupedTasks;
-  };
-
   const handleClearCompleted = () => {
     const updatedTasks = tasks.filter(task => !task.completed);
     setTasks(updatedTasks);
@@ -115,8 +68,12 @@ const TasksPage = () => {
     });
   };
 
-  const groupedActiveTasks = groupTasksByWeek(activeTasks);
-  const sortedActiveWeeks = Object.keys(groupedActiveTasks).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  // Separate tasks into active and completed
+  const activeTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter(task => task.completed);
+  
+  // Group and format active tasks by week
+  const groupedActiveTasks = formatWeeklyTasks(groupTasksByWeek(activeTasks));
   
   const totalActiveCount = activeTasks.length;
   const totalCompletedCount = completedTasks.length;
@@ -144,148 +101,18 @@ const TasksPage = () => {
 
         <div className="space-y-8">
           {/* Active Missions */}
-          {sortedActiveWeeks.length === 0 ? (
-            <Card className="border-[#D4B996]/40 shadow-md">
-              <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground py-8">
-                  No active missions. Add weekly missions in your journal entries to see them here.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            sortedActiveWeeks.map((weekKey) => {
-              const weekStart = new Date(weekKey);
-              const weekEnd = new Date(weekKey);
-              weekEnd.setDate(weekStart.getDate() + 6);
-              
-              const weekTasks = groupedActiveTasks[weekKey];
-              
-              return (
-                <Card key={weekKey} className="border-[#D4B996]/40 shadow-md overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-[#D4B996]/30 to-[#B6C199]/20 py-4">
-                    <CardTitle className="text-[#7D5A50] flex justify-between items-center">
-                      <span>
-                        Week of {weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {' '}
-                        {weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                      <Badge variant="outline" className="bg-white/50">
-                        {weekTasks.length} active
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <ScrollArea className="h-full max-h-[320px] pr-4">
-                      <ul className="space-y-3">
-                        {weekTasks.map((task) => (
-                          <li key={task.id} className="flex items-start gap-3 p-2 hover:bg-[#F7F3EE] rounded-md transition-colors">
-                            <Checkbox
-                              id={task.id}
-                              checked={task.completed}
-                              onCheckedChange={() => toggleTask(task.id)}
-                              className="mt-0.5 border-[#B56B45] data-[state=checked]:bg-[#B56B45] data-[state=checked]:text-white"
-                            />
-                            <label
-                              htmlFor={task.id}
-                              className="text-[#5A4A42] flex-1 cursor-pointer"
-                            >
-                              {task.text}
-                            </label>
-                          </li>
-                        ))}
-                      </ul>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
+          <ActiveTasksSection 
+            groupedActiveTasks={groupedActiveTasks} 
+            toggleTask={toggleTask} 
+          />
 
-          {/* Completed Missions Section */}
-          {completedTasks.length > 0 && (
-            <div className="mt-10">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-[#7D5A50] flex items-center gap-3">
-                  <CheckCheck className="h-6 w-6 text-[#6A994E]" />
-                  Completed Missions
-                </h2>
-                
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="text-sm border-[#B56B45] text-[#B56B45] hover:bg-[#B56B45]/10 hover:text-[#B56B45]"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Clear All
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete all your completed missions. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={handleClearCompleted}
-                        className="bg-[#B56B45] hover:bg-[#C87C56]"
-                      >
-                        Delete All
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-              
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="completed-tasks" className="border-[#D4B996]/40 shadow-md overflow-hidden bg-white rounded-md">
-                  <AccordionTrigger className="px-6 py-4 bg-gradient-to-r from-[#B6C199]/30 to-[#D4B996]/20 hover:no-underline">
-                    <span className="flex justify-between items-center w-full">
-                      <span className="text-[#7D5A50] font-medium">View all completed missions</span>
-                      <Badge variant="outline" className="bg-white/50 ml-2">
-                        {completedTasks.length} completed
-                      </Badge>
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="p-4">
-                      <ScrollArea className="h-full max-h-[300px]">
-                        <ul className="space-y-3">
-                          {completedTasks.map((task) => (
-                            <li key={task.id} className="flex items-center gap-3 p-2 hover:bg-[#F7F3EE] rounded-md transition-colors">
-                              <Checkbox
-                                id={`completed-${task.id}`}
-                                checked={task.completed}
-                                onCheckedChange={() => toggleTask(task.id)}
-                                className="mt-0.5 border-[#6A994E] data-[state=checked]:bg-[#6A994E] data-[state=checked]:text-white"
-                              />
-                              <label
-                                htmlFor={`completed-${task.id}`}
-                                className="text-[#5A4A42] flex-1 cursor-pointer line-through text-muted-foreground"
-                              >
-                                {task.text}
-                              </label>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => deleteTask(task.id)}
-                                className="h-8 w-8 text-[#B56B45] hover:text-[#C87C56] hover:bg-[#F7F3EE]"
-                              >
-                                <X className="h-4 w-4" />
-                                <span className="sr-only">Delete task</span>
-                              </Button>
-                            </li>
-                          ))}
-                        </ul>
-                      </ScrollArea>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          )}
+          {/* Completed Missions */}
+          <CompletedTasksSection 
+            completedTasks={completedTasks}
+            toggleTask={toggleTask}
+            deleteTask={deleteTask}
+            clearCompletedTasks={handleClearCompleted}
+          />
         </div>
       </div>
     </AppLayout>
