@@ -4,9 +4,10 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListTodo, Save } from "lucide-react";
+import { ListTodo, Save, CheckCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface Task {
   id: string;
@@ -67,11 +68,15 @@ const TasksPage = () => {
     });
   };
 
-  // Group tasks by the week they were created
-  const groupTasksByWeek = () => {
+  // Separate tasks into active and completed
+  const activeTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter(task => task.completed);
+
+  // Group active tasks by the week they were created
+  const groupTasksByWeek = (taskList: Task[]) => {
     const groupedTasks: { [weekKey: string]: Task[] } = {};
     
-    tasks.forEach(task => {
+    taskList.forEach(task => {
       const taskDate = new Date(task.date);
       const startOfWeek = new Date(taskDate);
       startOfWeek.setDate(taskDate.getDate() - taskDate.getDay()); // Go to the start of the week (Sunday)
@@ -96,11 +101,11 @@ const TasksPage = () => {
     });
   };
 
-  const groupedTasks = groupTasksByWeek();
-  const sortedWeeks = Object.keys(groupedTasks).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  const groupedActiveTasks = groupTasksByWeek(activeTasks);
+  const sortedActiveWeeks = Object.keys(groupedActiveTasks).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   
-  const completedCount = tasks.filter(t => t.completed).length;
-  const totalCount = tasks.length;
+  const totalActiveCount = activeTasks.length;
+  const totalCompletedCount = completedTasks.length;
 
   return (
     <AppLayout>
@@ -111,7 +116,7 @@ const TasksPage = () => {
               <ListTodo className="h-8 w-8 text-[#B56B45]" />
               Weekly Missions
             </h1>
-            {totalCount > 0 && completedCount > 0 && (
+            {completedTasks.length > 0 && (
               <button
                 onClick={handleClearCompleted}
                 className="text-sm text-[#B56B45] hover:text-[#C87C56] transition-colors"
@@ -123,33 +128,31 @@ const TasksPage = () => {
           <p className="text-lg text-[#886F68] mt-2">
             Track your weekly goals and missions from your journal entries
           </p>
-          {totalCount > 0 && (
-            <div className="mt-4 bg-[#F7F3EE] p-3 rounded-lg shadow-sm">
-              <p className="text-[#7D5A50] flex items-center gap-2">
-                <Save className="h-4 w-4 text-[#B56B45]" />
-                <span>Progress: {completedCount}/{totalCount} tasks completed</span>
-              </p>
-            </div>
-          )}
+          <div className="mt-4 bg-[#F7F3EE] p-3 rounded-lg shadow-sm">
+            <p className="text-[#7D5A50] flex items-center gap-2">
+              <Save className="h-4 w-4 text-[#B56B45]" />
+              <span>Progress: {totalCompletedCount}/{totalActiveCount + totalCompletedCount} tasks completed</span>
+            </p>
+          </div>
         </header>
 
         <div className="space-y-8">
-          {sortedWeeks.length === 0 ? (
+          {/* Active Missions */}
+          {sortedActiveWeeks.length === 0 ? (
             <Card className="border-[#D4B996]/40 shadow-md">
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground py-8">
-                  No tasks found. Add weekly missions in your journal entries to see them here.
+                  No active missions. Add weekly missions in your journal entries to see them here.
                 </p>
               </CardContent>
             </Card>
           ) : (
-            sortedWeeks.map((weekKey) => {
+            sortedActiveWeeks.map((weekKey) => {
               const weekStart = new Date(weekKey);
               const weekEnd = new Date(weekKey);
               weekEnd.setDate(weekStart.getDate() + 6);
               
-              const weekTasks = groupedTasks[weekKey];
-              const completedWeekTasks = weekTasks.filter(t => t.completed).length;
+              const weekTasks = groupedActiveTasks[weekKey];
               
               return (
                 <Card key={weekKey} className="border-[#D4B996]/40 shadow-md overflow-hidden">
@@ -160,7 +163,7 @@ const TasksPage = () => {
                         {weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                       <Badge variant="outline" className="bg-white/50">
-                        {completedWeekTasks}/{weekTasks.length} completed
+                        {weekTasks.length} active
                       </Badge>
                     </CardTitle>
                   </CardHeader>
@@ -177,7 +180,7 @@ const TasksPage = () => {
                             />
                             <label
                               htmlFor={task.id}
-                              className={`text-[#5A4A42] flex-1 cursor-pointer ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                              className="text-[#5A4A42] flex-1 cursor-pointer"
                             >
                               {task.text}
                             </label>
@@ -189,6 +192,53 @@ const TasksPage = () => {
                 </Card>
               );
             })
+          )}
+
+          {/* Completed Missions Section */}
+          {completedTasks.length > 0 && (
+            <div className="mt-10">
+              <h2 className="text-2xl font-semibold text-[#7D5A50] flex items-center gap-3 mb-4">
+                <CheckCheck className="h-6 w-6 text-[#6A994E]" />
+                Completed Missions
+              </h2>
+              
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="completed-tasks" className="border-[#D4B996]/40 shadow-md overflow-hidden bg-white rounded-md">
+                  <AccordionTrigger className="px-6 py-4 bg-gradient-to-r from-[#B6C199]/30 to-[#D4B996]/20 hover:no-underline">
+                    <span className="flex justify-between items-center w-full">
+                      <span className="text-[#7D5A50] font-medium">View all completed missions</span>
+                      <Badge variant="outline" className="bg-white/50 ml-2">
+                        {completedTasks.length} completed
+                      </Badge>
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="p-4">
+                      <ScrollArea className="h-full max-h-[300px]">
+                        <ul className="space-y-3">
+                          {completedTasks.map((task) => (
+                            <li key={task.id} className="flex items-start gap-3 p-2 hover:bg-[#F7F3EE] rounded-md transition-colors">
+                              <Checkbox
+                                id={`completed-${task.id}`}
+                                checked={task.completed}
+                                onCheckedChange={() => toggleTask(task.id)}
+                                className="mt-0.5 border-[#6A994E] data-[state=checked]:bg-[#6A994E] data-[state=checked]:text-white"
+                              />
+                              <label
+                                htmlFor={`completed-${task.id}`}
+                                className="text-[#5A4A42] flex-1 cursor-pointer line-through text-muted-foreground"
+                              >
+                                {task.text}
+                              </label>
+                            </li>
+                          ))}
+                        </ul>
+                      </ScrollArea>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
           )}
         </div>
       </div>
