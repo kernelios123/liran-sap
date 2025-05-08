@@ -8,7 +8,7 @@ export function JournalHeader() {
         </h1>
         <Leaf className="h-8 w-8 text-nature-brown animate-leaf-sway" />
       </div>
-      <p className="text-nature-brown/70 font-body text-xl">
+      <p className="text-nature-brown/70 font-body text-lg">
         A peaceful place to capture your thoughts, feelings, and weekly missions
       </p>
     </header>;
