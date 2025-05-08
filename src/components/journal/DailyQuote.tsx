@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DailyQuoteProps {
@@ -70,13 +69,15 @@ export function DailyQuote({
   if (!quote.text) return null;
 
   return (
-    <Card className={cn("border-nature-sand/30 bg-white/90 max-w-4xl mx-auto shadow-md", className)}>
-      <CardContent className="pt-6 py-8 px-6 md:px-10">
-        <div className="flex gap-4 items-start">
-          <Quote className="h-8 w-8 text-nature-forest flex-shrink-0 opacity-80 mt-1" />
-          <div>
-            <p className="text-lg md:text-xl italic text-nature-forest font-light">{quote.text}</p>
-            <p className="text-sm text-muted-foreground mt-3 text-right">— {quote.author}</p>
+    <Card className={cn("border-0 bg-white rounded-lg shadow-sm max-w-3xl w-full mx-auto", className)}>
+      <CardContent className="py-8 px-8 md:px-12">
+        <div className="flex flex-col text-center">
+          <div className="text-nature-forest text-2xl mb-4 font-serif">❝</div>
+          <p className="text-lg md:text-xl text-nature-forest font-light mb-4">{quote.text}</p>
+          <div className="flex items-center justify-center">
+            <div className="h-px w-12 bg-nature-sand/50 mr-3"></div>
+            <p className="text-sm text-muted-foreground">— {quote.author}</p>
+            <div className="h-px w-12 bg-nature-sand/50 ml-3"></div>
           </div>
         </div>
       </CardContent>
