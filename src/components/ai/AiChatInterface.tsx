@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Leaf, Send } from "lucide-react";
+import { Leaf, Send, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JournalData } from "../journal/JournalEntry";
 import { GeminiMessage, generateGeminiResponse } from "@/utils/geminiApi";
+import { supabase } from "@/integrations/supabase/client";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 type Message = {
   id: string;
@@ -31,6 +35,8 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [fetchedEntry, setFetchedEntry] = useState<JournalData | null>(null);
   const apiKey = "AIzaSyByz3LGrosVYpnuVPzw_gUvJfwsCruuxJ8";
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +62,8 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
           timestamp: new Date(),
         },
       ]);
+
+      setFetchedEntry(selectedEntry);
     }
   }, [selectedEntry]);
 
@@ -65,6 +73,72 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const fetchJournalEntry = async (selectedDate: Date) => {
+    try {
+      setIsTyping(true);
+
+      // Format the date to ISO string for Supabase query
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .eq('date', formattedDate + 'T00:00:00')
+        .maybeSingle();
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const journalData: JournalData = {
+          id: data.id,
+          date: new Date(data.date),
+          thoughts: data.thoughts || '',
+          feelings: data.feelings || '',
+          missions: data.missions || '',
+        };
+        
+        setFetchedEntry(journalData);
+        
+        // Notify the AI about the fetched entry
+        const aiMessage: Message = {
+          id: `ai-fetch-${Date.now()}`,
+          sender: "ai",
+          text: `I found your journal entry from ${format(new Date(data.date), 'MMMM d, yyyy')}. Would you like to discuss it?`,
+          timestamp: new Date(),
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        // No entry found for this date
+        const aiMessage: Message = {
+          id: `ai-fetch-error-${Date.now()}`,
+          sender: "ai",
+          text: `I couldn't find any journal entries for ${format(selectedDate, 'MMMM d, yyyy')}. Would you like to talk about something else?`,
+          timestamp: new Date(),
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+        setFetchedEntry(null);
+      }
+    } catch (error) {
+      console.error("Error fetching journal entry:", error);
+      
+      const aiMessage: Message = {
+        id: `ai-fetch-error-${Date.now()}`,
+        sender: "ai",
+        text: `I'm having trouble retrieving your journal entries. Let's talk about something else for now.`,
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+    } finally {
+      setIsTyping(false);
+      setDate(undefined); // Close the calendar
+    }
   };
 
   const handleSendMessage = async () => {
@@ -95,22 +169,23 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
       parts: ["I understand my role as the Grove Guide. I'll help users reflect on their journal entries with empathy and thoughtfulness, while keeping a calm, nature-inspired tone. I'm ready to assist."]
     });
     
-    // Add entry context if available
-    if (selectedEntry) {
-      let entryContext = `The user has a journal entry from ${selectedEntry.date.toLocaleDateString()}.\n`;
+    // Add entry context if available (either from selectedEntry prop or fetched entry)
+    const entryToUse = fetchedEntry || selectedEntry;
+    if (entryToUse) {
+      let entryContext = `The user has a journal entry from ${entryToUse.date.toLocaleDateString()}.\n`;
       
-      if (selectedEntry.thoughts) {
-        entryContext += `Thoughts: ${selectedEntry.thoughts}\n`;
+      if (entryToUse.thoughts) {
+        entryContext += `Thoughts: ${entryToUse.thoughts}\n`;
       }
       
-      if (selectedEntry.feelings) {
-        entryContext += `Feelings: ${selectedEntry.feelings}\n`;
+      if (entryToUse.feelings) {
+        entryContext += `Feelings: ${entryToUse.feelings}\n`;
       }
       
-      if (selectedEntry.missions && Array.isArray(selectedEntry.missions)) {
-        entryContext += `Missions: ${selectedEntry.missions.join(", ")}`;
-      } else if (selectedEntry.missions) {
-        entryContext += `Missions: ${selectedEntry.missions}`;
+      if (entryToUse.missions && typeof entryToUse.missions === 'string') {
+        entryContext += `Missions: ${entryToUse.missions}`;
+      } else if (entryToUse.missions && Array.isArray(entryToUse.missions)) {
+        entryContext += `Missions: ${entryToUse.missions.join(", ")}`;
       }
       
       geminiMessages.push({
@@ -120,7 +195,7 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
       
       geminiMessages.push({
         role: "model",
-        parts: ["Thank you for sharing this context about the user's journal entry. I'll use this information to provide more personalized guidance."]
+        parts: ["Thank you for sharing this context about the user's journal entry. I'll use this information to provide personalized guidance and insights."]
       });
     }
     
@@ -181,6 +256,27 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
             <Leaf className="h-5 w-5 text-nature-leaf" />
             <span>Grove Guide</span>
           </CardTitle>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon" className="h-8 w-8 rounded-full">
+                <Calendar className="h-4 w-4" />
+                <span className="sr-only">Select journal date</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={(newDate) => {
+                  if (newDate) {
+                    setDate(newDate);
+                    fetchJournalEntry(newDate);
+                  }
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4">

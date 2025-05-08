@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AiChatInterface } from "@/components/ai/AiChatInterface";
 import { JournalData } from "@/components/journal/JournalEntry";
 import { Leaf, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
 
 const AiChatPage = () => {
   const [selectedEntry, setSelectedEntry] = useState<JournalData | undefined>();
@@ -43,7 +45,7 @@ const AiChatPage = () => {
             <Card className="bg-white/80 border-nature-sand/30 shadow-sm animate-fade-in">
               <CardContent className="p-4">
                 <h3 className="font-medium text-nature-forest mb-2">
-                  Discussing entry from {selectedEntry.date.toLocaleDateString()}
+                  Discussing entry from {format(selectedEntry.date, 'MMMM d, yyyy')}
                 </h3>
                 {selectedEntry.thoughts && (
                   <p className="text-sm mb-1">
@@ -52,9 +54,20 @@ const AiChatPage = () => {
                   </p>
                 )}
                 {selectedEntry.feelings && (
-                  <p className="text-sm">
+                  <p className="text-sm mb-1">
                     <span className="font-medium">Feelings:</span> {selectedEntry.feelings.substring(0, 100)}
                     {selectedEntry.feelings.length > 100 ? "..." : ""}
+                  </p>
+                )}
+                {selectedEntry.missions && (
+                  <p className="text-sm">
+                    <span className="font-medium">Missions:</span> {
+                      typeof selectedEntry.missions === 'string' 
+                        ? selectedEntry.missions.substring(0, 100) + (selectedEntry.missions.length > 100 ? "..." : "") 
+                        : Array.isArray(selectedEntry.missions) 
+                          ? selectedEntry.missions.join(", ").substring(0, 100) + (selectedEntry.missions.join(", ").length > 100 ? "..." : "")
+                          : ""
+                    }
                   </p>
                 )}
               </CardContent>
