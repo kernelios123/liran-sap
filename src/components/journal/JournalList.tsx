@@ -57,8 +57,8 @@ export function JournalList({ entries, onSelect, onDelete }: JournalListProps) {
       >
         {entries.map((entry, index) => (
           <AccordionItem
-            key={index}
-            value={`entry-${index}`}
+            key={entry.id || index}
+            value={`entry-${entry.id || index}`}
             className={cn(
               "border border-nature-sage/20 rounded-xl overflow-hidden",
               "bg-nature-cream/90 shadow-soft"

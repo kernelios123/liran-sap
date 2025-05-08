@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,16 +9,20 @@ import { useNavigate } from "react-router-dom";
 import { JournalTab } from "./tabs/JournalTab";
 import { MissionsTab } from "./tabs/MissionsTab";
 import { processMissionsAsTasks } from "./TaskProcessor";
+
 type JournalEntryProps = {
   onSave: (data: JournalData) => void;
   currentDate: Date;
 };
+
 export type JournalData = {
+  id?: string;
   date: Date;
   thoughts: string;
   feelings: string;
   missions: string;
 };
+
 export function JournalEntry({
   onSave,
   currentDate
@@ -28,6 +33,7 @@ export function JournalEntry({
     toast
   } = useToast();
   const navigate = useNavigate();
+
   const handleSave = () => {
     // Don't require content if only missions were entered
     if (!journalContent && !missions) {
@@ -69,6 +75,7 @@ export function JournalEntry({
       setMissions(""); // Clear missions after processing
     }
   };
+
   const handleMissionsSubmit = () => {
     if (!missions || missions.trim() === "") {
       toast({
@@ -81,6 +88,7 @@ export function JournalEntry({
     processMissionsAsTasks(missions, currentDate, navigate);
     setMissions("");
   };
+
   return <Card className="soft-card animate-fade-in">
       <CardHeader className="card-header">
         <CardTitle className="flex items-center gap-3">

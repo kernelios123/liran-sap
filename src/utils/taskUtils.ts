@@ -1,8 +1,11 @@
+
 export interface Task {
   id: string;
   text: string;
   completed: boolean;
   date: Date;
+  user_id?: string;
+  created_at?: string;
 }
 
 export const removeDuplicateTasks = (taskList: Task[]): Task[] => {
