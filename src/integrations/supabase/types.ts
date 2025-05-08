@@ -15,6 +15,7 @@ export type Database = {
           date: string
           feelings: string | null
           id: string
+          "Journal Entry": string | null
           missions: string | null
           thoughts: string | null
           user_id: string | null
@@ -24,6 +25,7 @@ export type Database = {
           date: string
           feelings?: string | null
           id?: string
+          "Journal Entry"?: string | null
           missions?: string | null
           thoughts?: string | null
           user_id?: string | null
@@ -33,6 +35,7 @@ export type Database = {
           date?: string
           feelings?: string | null
           id?: string
+          "Journal Entry"?: string | null
           missions?: string | null
           thoughts?: string | null
           user_id?: string | null

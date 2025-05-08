@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { JournalTab } from "./tabs/JournalTab";
 import { MissionsTab } from "./tabs/MissionsTab";
 import { processMissionsAsTasks } from "./TaskProcessor";
+import { supabase } from "@/integrations/supabase/client";
 
 type JournalEntryProps = {
   onSave: (data: JournalData) => void;
@@ -34,7 +35,7 @@ export function JournalEntry({
   } = useToast();
   const navigate = useNavigate();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Don't require content if only missions were entered
     if (!journalContent && !missions) {
       toast({
@@ -45,38 +46,48 @@ export function JournalEntry({
       return;
     }
 
-    // Only save journal entry if there is content
-    if (journalContent) {
-      // Save the entry without missions (they go to tasks)
-      const journalData = {
-        date: currentDate,
-        thoughts: journalContent,
-        // Save all content as thoughts
-        feelings: "",
-        // No longer using separate feelings field
-        missions: "" // Don't save missions in journal entries
-      };
-      onSave(journalData);
+    try {
+      // Only save journal entry if there is content
+      if (journalContent) {
+        // Save all journal content as thoughts for now
+        const journalData = {
+          date: currentDate,
+          thoughts: journalContent,
+          feelings: "", // Keep for compatibility
+          missions: missions // Store missions in journal entry too
+        };
+        
+        // Call the parent's onSave which handles the Supabase operation
+        await onSave(journalData);
+        
+        toast({
+          title: "Entry Saved",
+          description: "Your journal entry has been saved successfully",
+          action: <div className="h-8 w-8 bg-nature-sage/20 rounded-full flex items-center justify-center">
+              <Leaf className="h-4 w-4 text-nature-brown" />
+            </div>
+        });
+
+        // Clear journal content after saving
+        setJournalContent("");
+      }
+
+      // Process missions separately if provided
+      if (missions && missions.trim() !== "") {
+        await processMissionsAsTasks(missions, currentDate, navigate);
+        setMissions(""); // Clear missions after processing
+      }
+    } catch (error) {
+      console.error("Error saving entry:", error);
       toast({
-        title: "Entry Saved",
-        description: "Your journal entry has been saved",
-        action: <div className="h-8 w-8 bg-nature-sage/20 rounded-full flex items-center justify-center">
-            <Leaf className="h-4 w-4 text-nature-brown" />
-          </div>
+        title: "Error Saving",
+        description: "There was a problem saving your entry. Please try again.",
+        variant: "destructive"
       });
-
-      // Clear journal content after saving
-      setJournalContent("");
-    }
-
-    // Process missions separately if provided
-    if (missions && missions.trim() !== "") {
-      processMissionsAsTasks(missions, currentDate, navigate);
-      setMissions(""); // Clear missions after processing
     }
   };
 
-  const handleMissionsSubmit = () => {
+  const handleMissionsSubmit = async () => {
     if (!missions || missions.trim() === "") {
       toast({
         title: "No Missions",
@@ -85,8 +96,23 @@ export function JournalEntry({
       });
       return;
     }
-    processMissionsAsTasks(missions, currentDate, navigate);
-    setMissions("");
+    
+    try {
+      await processMissionsAsTasks(missions, currentDate, navigate);
+      setMissions("");
+      
+      toast({
+        title: "Missions Added",
+        description: "Your weekly missions were added successfully",
+      });
+    } catch (error) {
+      console.error("Error adding missions:", error);
+      toast({
+        title: "Error Adding Missions",
+        description: "There was a problem adding your missions. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return <Card className="soft-card animate-fade-in">

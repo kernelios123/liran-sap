@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { JournalEntry, JournalData } from "@/components/journal/JournalEntry";
 import { JournalList } from "@/components/journal/JournalList";
@@ -23,7 +24,7 @@ const JournalPage = () => {
         setIsLoading(true);
         const { data, error } = await supabase
           .from('journal_entries')
-          .select('*')
+          .select('id, date, thoughts, feelings, missions')
           .order('date', { ascending: false });
 
         if (error) {
@@ -66,41 +67,54 @@ const JournalPage = () => {
   }, [toast]);
 
   const handleSaveEntry = async (data: JournalData) => {
-    // Only save if there's actual content (thoughts or feelings)
-    if (data.thoughts || data.feelings) {
-      try {
-        // Create a unique ID for the entry if one doesn't exist
-        const entryId = data.id || uuidv4();
-        
-        // Save to Supabase
-        const { error } = await supabase
-          .from('journal_entries')
-          .insert({
-            id: entryId,
-            date: data.date.toISOString(),
-            thoughts: data.thoughts,
-            feelings: data.feelings,
-            missions: data.missions
-          });
-
-        if (error) throw error;
-
-        // Add the new entry to the state
-        const newEntry = { ...data, id: entryId };
-        setEntries(prev => [newEntry, ...prev]);
-
-        toast({
-          title: "Entry saved",
-          description: "Your journal entry has been saved successfully."
+    // Only save if there's actual content
+    try {
+      // Create a unique ID for the entry if one doesn't exist
+      const entryId = data.id || uuidv4();
+      
+      console.log("Saving journal entry:", {
+        id: entryId,
+        date: data.date.toISOString(),
+        thoughts: data.thoughts,
+        feelings: data.feelings,
+        missions: data.missions
+      });
+      
+      // Save to Supabase
+      const { error } = await supabase
+        .from('journal_entries')
+        .insert({
+          id: entryId,
+          date: data.date.toISOString(),
+          thoughts: data.thoughts,
+          feelings: data.feelings,
+          missions: data.missions
         });
-      } catch (error) {
-        console.error('Error saving journal entry:', error);
-        toast({
-          title: "Error saving entry",
-          description: "There was a problem saving your journal entry.",
-          variant: "destructive"
-        });
-      }
+
+      if (error) throw error;
+
+      // Add the new entry to the state
+      const newEntry = { ...data, id: entryId };
+      setEntries(prev => [newEntry, ...prev]);
+
+      toast({
+        title: "Entry saved",
+        description: "Your journal entry has been saved successfully."
+      });
+      
+      // Also save to localStorage as backup
+      const updatedEntries = [newEntry, ...entries.filter(e => e.id !== entryId)];
+      localStorage.setItem("journal-entries", JSON.stringify(updatedEntries));
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+      toast({
+        title: "Error saving entry",
+        description: "There was a problem saving your journal entry.",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 
@@ -119,6 +133,9 @@ const JournalPage = () => {
 
       // Remove the deleted entry from state
       setEntries(prev => prev.filter(entry => entry.id !== entryToDelete.id));
+      
+      // Also remove from localStorage
+      localStorage.setItem("journal-entries", JSON.stringify(entries.filter(entry => entry.id !== entryToDelete.id)));
       
       toast({
         title: "Entry deleted",
