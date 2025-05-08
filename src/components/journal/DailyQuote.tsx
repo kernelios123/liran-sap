@@ -54,7 +54,7 @@ export function DailyQuote({
       <CardContent className="px-8 md:px-14 py-[15px]">
         <div className="flex flex-col text-center">
           <div className="text-nature-sage text-4xl mb-5 font-heading my-0 py-0">❝</div>
-          <p className="text-lg md:text-xl text-nature-brown font-heading font-light mb-5 leading-relaxed">
+          <p className="text-lg text-nature-brown font-heading font-light mb-5 leading-relaxed md:text-2xl">
             {quote.text}
           </p>
           <div className="flex items-center justify-center mt-2">
