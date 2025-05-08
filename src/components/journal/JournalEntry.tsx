@@ -36,12 +36,20 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
       return;
     }
 
-    onSave({
+    // Save the entry
+    const journalData = {
       date: currentDate,
       thoughts,
       feelings,
       missions,
-    });
+    };
+    
+    onSave(journalData);
+    
+    // Process missions for tasks if missions are provided
+    if (missions && missions.trim() !== "") {
+      processMissionsAsTasks(journalData);
+    }
 
     toast({
       title: "Entry Saved",
@@ -57,6 +65,57 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
     setThoughts("");
     setFeelings("");
     setMissions("");
+  };
+  
+  const processMissionsAsTasks = (entry: JournalData) => {
+    // Check if there are missions to process
+    if (!entry.missions || entry.missions.trim() === "") return;
+    
+    // Get existing tasks
+    const savedTasks = localStorage.getItem("journal-tasks");
+    let existingTasks = savedTasks ? JSON.parse(savedTasks) : [];
+    
+    // Convert existingTasks dates from string to Date objects for comparison
+    existingTasks = existingTasks.map((task: any) => ({
+      ...task,
+      date: new Date(task.date),
+    }));
+    
+    // Process missions into tasks
+    const missionLines = entry.missions
+      .split("\n")
+      .filter(line => line.trim() !== "");
+    
+    const newTasks = missionLines.map(line => ({
+      id: `${entry.date.getTime()}-${Math.random().toString(36).substr(2, 9)}`,
+      text: line.trim(),
+      completed: false,
+      date: new Date(entry.date),
+    }));
+    
+    // Add only new tasks (avoid duplicates)
+    const allTasks = [...existingTasks];
+    
+    newTasks.forEach(newTask => {
+      const isDuplicate = existingTasks.some((existingTask: any) => 
+        existingTask.text === newTask.text
+      );
+      
+      if (!isDuplicate) {
+        allTasks.push(newTask);
+      }
+    });
+    
+    // Save back to localStorage
+    localStorage.setItem("journal-tasks", JSON.stringify(allTasks));
+    
+    // Show notification if tasks were added
+    if (newTasks.length > 0) {
+      toast({
+        title: "Tasks Created",
+        description: `${newTasks.length} mission${newTasks.length > 1 ? 's' : ''} added to your tasks list`,
+      });
+    }
   };
 
   return (
@@ -113,7 +172,7 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
           </TabsContent>
           <TabsContent value="missions" className="mt-0">
             <Textarea
-              placeholder="What are your missions for this week?"
+              placeholder="What are your missions for this week? Add one mission per line to create tasks automatically."
               className={cn(
                 "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
                 "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"

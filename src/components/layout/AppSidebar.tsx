@@ -1,5 +1,5 @@
 
-import { Leaf, Book, Calendar, BarChart } from "lucide-react";
+import { Leaf, Book, Calendar, BarChart, ListTodo } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Book, text: "Journal", path: "/" },
+  { icon: ListTodo, text: "Tasks", path: "/tasks" },
   { icon: Leaf, text: "AI Chat", path: "/ai-chat" },
   { icon: BarChart, text: "Insights", path: "/insights" },
   { icon: Calendar, text: "Calendar", path: "/calendar" },

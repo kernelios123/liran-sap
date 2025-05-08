@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AiChat from "./pages/AiChat";
 import Insights from "./pages/Insights";
 import Calendar from "./pages/Calendar";
+import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/ai-chat" element={<AiChat />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/tasks" element={<Tasks />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
