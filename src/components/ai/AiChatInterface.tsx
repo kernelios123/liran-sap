@@ -34,17 +34,29 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [apiKey, setApiKey] = useState<string>(() => {
-    return localStorage.getItem("gemini-api-key") || "";
+    return localStorage.getItem("gemini-api-key") || "AIzaSyByz3LGrosVYpnuVPzw_gUvJfwsCruuxJ8";
   });
-  const [showApiDialog, setShowApiDialog] = useState(!localStorage.getItem("gemini-api-key"));
+  const [showApiDialog, setShowApiDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // When the component mounts, save the provided API key to localStorage
+  useEffect(() => {
+    if (apiKey && apiKey !== localStorage.getItem("gemini-api-key")) {
+      localStorage.setItem("gemini-api-key", apiKey);
+    }
+  }, [apiKey]);
 
   useEffect(() => {
     if (selectedEntry) {
+      // Fix the type error - ensure missions is treated as an array if it exists
+      const missionsText = selectedEntry.missions && Array.isArray(selectedEntry.missions) 
+        ? selectedEntry.missions.join(", ")
+        : selectedEntry.missions;
+        
       const entryText = `I see you wrote about ${
         selectedEntry.thoughts ? "your thoughts" : ""
       }${selectedEntry.feelings ? (selectedEntry.thoughts ? " and " : "") + "your feelings" : ""}${
-        selectedEntry.missions ? (selectedEntry.thoughts || selectedEntry.feelings ? " and " : "") + "your missions" : ""
+        missionsText ? (selectedEntry.thoughts || selectedEntry.feelings ? " and " : "") + "your missions" : ""
       } on ${selectedEntry.date.toLocaleDateString()}. Would you like to discuss any of these topics?`;
       
       setMessages((prev) => [
@@ -104,10 +116,21 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
     
     // Add entry context if available
     if (selectedEntry) {
-      const entryContext = `The user has a journal entry from ${selectedEntry.date.toLocaleDateString()}.\n` +
-        (selectedEntry.thoughts ? `Thoughts: ${selectedEntry.thoughts}\n` : "") +
-        (selectedEntry.feelings ? `Feelings: ${selectedEntry.feelings}\n` : "") +
-        (selectedEntry.missions ? `Missions: ${selectedEntry.missions.join(", ")}` : "");
+      let entryContext = `The user has a journal entry from ${selectedEntry.date.toLocaleDateString()}.\n`;
+      
+      if (selectedEntry.thoughts) {
+        entryContext += `Thoughts: ${selectedEntry.thoughts}\n`;
+      }
+      
+      if (selectedEntry.feelings) {
+        entryContext += `Feelings: ${selectedEntry.feelings}\n`;
+      }
+      
+      if (selectedEntry.missions && Array.isArray(selectedEntry.missions)) {
+        entryContext += `Missions: ${selectedEntry.missions.join(", ")}`;
+      } else if (selectedEntry.missions) {
+        entryContext += `Missions: ${selectedEntry.missions}`;
+      }
       
       geminiMessages.push({
         role: "user",
