@@ -24,8 +24,10 @@ export function useTasks() {
         }
 
         // Convert string dates to Date objects
-        const parsedTasks = data.map((task) => ({
-          ...task,
+        const parsedTasks: Task[] = data.map((task) => ({
+          id: task.id,
+          text: task.text,
+          completed: task.completed,
           date: new Date(task.date),
         }));
         

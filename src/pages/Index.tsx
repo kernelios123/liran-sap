@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { JournalEntry, JournalData } from "@/components/journal/JournalEntry";
 import { JournalList } from "@/components/journal/JournalList";
