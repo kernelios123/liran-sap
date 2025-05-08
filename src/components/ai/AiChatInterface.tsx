@@ -2,14 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Leaf, Send, Key } from "lucide-react";
+import { Leaf, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JournalData } from "../journal/JournalEntry";
 import { GeminiMessage, generateGeminiResponse } from "@/utils/geminiApi";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type Message = {
   id: string;
@@ -33,18 +31,8 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [apiKey, setApiKey] = useState<string>(() => {
-    return localStorage.getItem("gemini-api-key") || "AIzaSyByz3LGrosVYpnuVPzw_gUvJfwsCruuxJ8";
-  });
-  const [showApiDialog, setShowApiDialog] = useState(false);
+  const apiKey = "AIzaSyByz3LGrosVYpnuVPzw_gUvJfwsCruuxJ8";
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // When the component mounts, save the provided API key to localStorage
-  useEffect(() => {
-    if (apiKey && apiKey !== localStorage.getItem("gemini-api-key")) {
-      localStorage.setItem("gemini-api-key", apiKey);
-    }
-  }, [apiKey]);
 
   useEffect(() => {
     if (selectedEntry) {
@@ -77,13 +65,6 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleSaveApiKey = () => {
-    if (apiKey) {
-      localStorage.setItem("gemini-api-key", apiKey);
-      setShowApiDialog(false);
-    }
   };
 
   const handleSendMessage = async () => {
@@ -159,46 +140,23 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
     });
 
     try {
-      // If API key is available, use Gemini
-      if (apiKey) {
-        const response = await generateGeminiResponse(geminiMessages, apiKey);
-        
-        const aiMessage: Message = {
-          id: `ai-${Date.now()}`,
-          sender: "ai",
-          text: response,
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, aiMessage]);
-      } else {
-        // Fallback to simple responses if no API key
-        setTimeout(() => {
-          const fallbackResponses = [
-            "I'd love to help more, but I need a valid API key to access my full capabilities. Please set up your Gemini API key.",
-            "To provide more personalized responses, I need a Gemini API key. Please click the key icon to set it up.",
-            "I notice you haven't set up your Gemini API key yet. I can offer much deeper insights once that's configured.",
-          ];
-          
-          const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-          
-          const aiMessage: Message = {
-            id: `ai-${Date.now()}`,
-            sender: "ai",
-            text: randomResponse,
-            timestamp: new Date(),
-          };
-          
-          setMessages((prev) => [...prev, aiMessage]);
-        }, 1000);
-      }
+      const response = await generateGeminiResponse(geminiMessages, apiKey);
+      
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        sender: "ai",
+        text: response,
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error generating response:", error);
       
       const errorMessage: Message = {
         id: `ai-error-${Date.now()}`,
         sender: "ai",
-        text: "I'm having trouble connecting to my knowledge base. Please check your API key or try again later.",
+        text: "I'm having trouble connecting to my knowledge base. Please try again later.",
         timestamp: new Date(),
       };
       
@@ -223,44 +181,6 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
             <Leaf className="h-5 w-5 text-nature-leaf" />
             <span>Grove Guide</span>
           </CardTitle>
-          <Dialog open={showApiDialog} onOpenChange={setShowApiDialog}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" title="Set Gemini API Key">
-                <Key className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Set Your Gemini API Key</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <p className="text-sm text-muted-foreground">
-                  Enter your Gemini API key to enable AI-powered conversations. 
-                  Your key will be stored locally in your browser.
-                </p>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Enter your Gemini API key"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleSaveApiKey}>Save</Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  You can get a Gemini API key from the{" "}
-                  <a 
-                    href="https://aistudio.google.com/app/apikey" 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="text-primary underline underline-offset-2"
-                  >
-                    Google AI Studio
-                  </a>
-                </p>
-              </div>
-            </DialogContent>
-          </Dialog>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4">
