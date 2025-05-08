@@ -19,13 +19,13 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "h-screen bg-sidebar sticky top-0 border-r border-border transition-all duration-300 flex flex-col",
+        "h-screen bg-nature-cream sticky top-0 border-r border-nature-sage/20 transition-all duration-300 flex flex-col",
         collapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="p-4 flex items-center justify-between border-b border-border">
+      <div className="p-5 flex items-center justify-between border-b border-nature-sage/20">
         {!collapsed && (
-          <h1 className="text-xl font-semibold text-nature-forest">
+          <h1 className="text-xl font-heading font-semibold text-nature-brown">
             Whispering Grove
           </h1>
         )}
@@ -33,40 +33,40 @@ export function AppSidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="text-nature-forest"
+          className="text-nature-brown hover:text-nature-sage hover:bg-nature-beige/50 transition-colors duration-300"
         >
           {collapsed ? "→" : "←"}
         </Button>
       </div>
 
-      <nav className="flex-1 py-6">
-        <ul className="space-y-2 px-2">
+      <nav className="flex-1 py-8 px-2">
+        <ul className="space-y-4">
           {navItems.map((item) => (
             <li key={item.path}>
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
+                    "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300",
                     isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-sidebar-foreground hover:bg-accent/50"
+                      ? "bg-nature-sage/20 text-nature-brown font-medium"
+                      : "text-nature-brown/70 hover:bg-nature-beige hover:text-nature-brown"
                   )
                 }
               >
                 <item.icon className={`h-5 w-5 ${collapsed ? 'mx-auto' : ''}`} />
-                {!collapsed && <span>{item.text}</span>}
+                {!collapsed && <span className="font-body">{item.text}</span>}
               </NavLink>
             </li>
           ))}
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-border mt-auto">
+      <div className="p-4 border-t border-nature-sage/20 mt-auto">
         {!collapsed && (
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-nature-brown/60 font-body">
             <p>Whispering Grove Journal</p>
-            <p>Connect with nature & yourself</p>
+            <p className="mt-1">Connect with nature & yourself</p>
           </div>
         )}
       </div>

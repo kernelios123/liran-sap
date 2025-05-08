@@ -55,8 +55,8 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
         title: "Entry Saved",
         description: "Your journal entry has been saved",
         action: (
-          <div className="h-8 w-8 bg-[#D4B996]/20 rounded-full flex items-center justify-center">
-            <Leaf className="h-4 w-4 text-[#B56B45]" />
+          <div className="h-8 w-8 bg-nature-sage/20 rounded-full flex items-center justify-center">
+            <Leaf className="h-4 w-4 text-nature-brown" />
           </div>
         ),
       });
@@ -87,25 +87,25 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
   };
 
   return (
-    <Card className="w-full shadow-lg border-[#D4B996]/40 animate-fade-in overflow-hidden backdrop-blur-sm transition-all hover:shadow-xl">
-      <CardHeader className="bg-gradient-to-r from-[#D4B996]/30 to-[#B6C199]/20 rounded-t-md py-6">
+    <Card className="soft-card animate-fade-in">
+      <CardHeader className="card-header">
         <CardTitle className="flex items-center gap-3">
-          <Pencil className="h-6 w-6 text-[#B56B45]" />
-          <span className="text-2xl text-[#7D5A50]">New Journal Entry</span>
+          <Pencil className="h-6 w-6 text-nature-brown" />
+          <span className="text-2xl text-nature-brown font-heading">New Journal Entry</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-8 pt-6">
         <Tabs defaultValue="journal" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6 bg-[#E6DFD9] p-1.5 rounded-md">
+          <TabsList className="grid grid-cols-2 mb-6 bg-nature-beige p-1.5 rounded-lg">
             <TabsTrigger 
               value="journal"
-              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
+              className="data-[state=active]:active-tab soft-tab py-2.5"
             >
               Journal
             </TabsTrigger>
             <TabsTrigger 
               value="missions"
-              className="data-[state=active]:bg-white data-[state=active]:text-[#7D5A50] data-[state=active]:shadow-md py-2.5"
+              className="data-[state=active]:active-tab soft-tab py-2.5"
             >
               Weekly Missions
             </TabsTrigger>
@@ -125,10 +125,10 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
           </TabsContent>
         </Tabs>
       </CardContent>
-      <CardFooter className="flex justify-end bg-gradient-to-r from-[#E6DFD9]/50 to-[#D4B996]/30 py-6 px-8 rounded-b-md">
+      <CardFooter className="flex justify-end bg-sage-gradient/30 py-6 px-8 rounded-b-xl">
         <Button 
           onClick={handleSave} 
-          className="bg-[#B56B45] hover:bg-[#C87C56] shadow-md transition-all hover:translate-y-[-2px] text-white font-medium px-6 py-5 text-base"
+          className="warm-button shadow-soft hover:translate-y-[-2px] font-medium px-6 py-5 text-base rounded-lg"
         >
           Save Entry
         </Button>

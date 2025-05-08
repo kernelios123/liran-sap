@@ -1,9 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
 interface DailyQuoteProps {
   className?: string;
 }
+
 const quotes = [{
   text: "The best time to plant a tree was 20 years ago. The second best time is now.",
   author: "Chinese Proverb"
@@ -35,6 +38,7 @@ const quotes = [{
   text: "Every morning we are born again. What we do today is what matters most.",
   author: "Buddha"
 }];
+
 export function DailyQuote({
   className
 }: DailyQuoteProps) {
@@ -42,6 +46,7 @@ export function DailyQuote({
     text: "",
     author: ""
   });
+  
   useEffect(() => {
     // Use date-based seeding to ensure same quote for the entire day
     const today = new Date();
@@ -49,18 +54,24 @@ export function DailyQuote({
     const quoteIndex = dayOfYear % quotes.length;
     setQuote(quotes[quoteIndex]);
   }, []);
+  
   if (!quote.text) return null;
-  return <Card className={cn("border-0 bg-white rounded-lg shadow-sm max-w-3xl w-full mx-auto", className)}>
-      <CardContent className="py-8 px-8 md:px-12">
+  
+  return (
+    <Card className={cn("border-0 bg-nature-cream rounded-xl shadow-soft max-w-3xl w-full mx-auto", className)}>
+      <CardContent className="py-8 px-8 md:px-14">
         <div className="flex flex-col text-center">
-          <div className="text-nature-forest text-3xl mb-4 font-serif my-0 py-0 rounded-sm">❝</div>
-          <p className="text-lg text-nature-forest font-light mb-4 py-0 my-0 md:text-xl">{quote.text}</p>
-          <div className="flex items-center justify-center">
-            <div className="h-px w-12 bg-nature-sand/50 mr-3"></div>
-            <p className="text-sm text-muted-foreground">— {quote.author}</p>
-            <div className="h-px w-12 bg-nature-sand/50 ml-3"></div>
+          <div className="text-nature-sage text-4xl mb-5 font-heading my-0 py-0">❝</div>
+          <p className="text-lg md:text-xl text-nature-brown font-heading font-light mb-5 leading-relaxed">
+            {quote.text}
+          </p>
+          <div className="flex items-center justify-center mt-2">
+            <div className="h-px w-14 bg-nature-sage/30 mr-4"></div>
+            <p className="text-sm text-nature-brown/60 font-body">— {quote.author}</p>
+            <div className="h-px w-14 bg-nature-sage/30 ml-4"></div>
           </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }

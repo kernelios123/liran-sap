@@ -71,7 +71,11 @@ export default {
 					'stone': '#A1887F',
 					'bark': '#795548',
 					'sand': '#D7CCC8',
-					'water': '#29B6F6'
+					'water': '#29B6F6',
+					'sage': '#A8B9A7',
+					'beige': '#F5F0E3',
+					'cream': '#FFF9F0',
+					'brown': '#8C6E5D'
 				}
 			},
 			borderRadius: {
@@ -95,19 +99,40 @@ export default {
 				'fade-in': {
 					from: { opacity: '0', transform: 'translateY(10px)' },
 					to: { opacity: '1', transform: 'translateY(0)' }
+				},
+				'button-glow': {
+					'0%, 100%': { 
+						boxShadow: '0 0 5px rgba(140, 110, 93, 0.2)' 
+					},
+					'50%': { 
+						boxShadow: '0 0 15px rgba(140, 110, 93, 0.4)' 
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'leaf-sway': 'leaf-sway 6s ease-in-out infinite',
-				'fade-in': 'fade-in 0.5s ease-out'
+				'fade-in': 'fade-in 0.5s ease-out',
+				'button-glow': 'button-glow 2s ease-in-out infinite'
 			},
 			fontFamily: {
-				journal: ['Noto Serif', 'serif']
+				heading: ['Cormorant Garamond', 'serif'],
+				body: ['Lato', 'sans-serif'],
+				journal: ['Cormorant Garamond', 'serif']
 			},
 			backgroundImage: {
-				'leaf-pattern': "url('/leaf-pattern.svg')"
+				'leaf-pattern': "url('/leaf-pattern.svg')",
+				'sage-gradient': 'linear-gradient(to right bottom, #A8B9A7, #d1dbd0)',
+				'cream-gradient': 'linear-gradient(to right bottom, #FFF9F0, #F5F0E3)'
+			},
+			boxShadow: {
+				'soft': '0 4px 12px rgba(0, 0, 0, 0.05)',
+				'glow': '0 0 15px rgba(140, 110, 93, 0.3)'
+			},
+			spacing: {
+				'18': '4.5rem',
+				'22': '5.5rem',
 			}
 		}
 	},

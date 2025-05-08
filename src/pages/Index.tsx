@@ -71,34 +71,34 @@ const JournalPage = () => {
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto">
-        <header className="mb-10 text-center">
-          <div className="inline-flex items-center gap-3 mb-3">
-            <Leaf className="h-8 w-8 text-[#B56B45] animate-leaf-sway" />
-            <h1 className="text-4xl md:text-5xl font-semibold text-[#7D5A50]">
+        <header className="mb-12 text-center">
+          <div className="inline-flex items-center gap-4 mb-4">
+            <Leaf className="h-8 w-8 text-nature-brown animate-leaf-sway" />
+            <h1 className="text-4xl md:text-5xl font-heading font-semibold text-nature-brown">
               Whispering Grove Journal
             </h1>
-            <Leaf className="h-8 w-8 text-[#B56B45] animate-leaf-sway" />
+            <Leaf className="h-8 w-8 text-nature-brown animate-leaf-sway" />
           </div>
-          <p className="text-lg text-[#886F68]">
+          <p className="text-lg text-nature-brown/70 font-body">
             A peaceful place to capture your thoughts, feelings, and weekly missions
           </p>
         </header>
         
-        <DailyQuote className="mb-8" />
+        <DailyQuote className="mb-10" />
         
         <div className="grid gap-10 lg:grid-cols-[2fr,1fr] items-start">
           <div className="w-full">
-            <h2 className="text-2xl font-semibold mb-4 text-[#7D5A50] flex items-center gap-2">
+            <h2 className="text-2xl font-semibold mb-5 text-nature-brown flex items-center gap-2 font-heading">
               <span>New Entry</span>
-              <div className="h-1 w-1 rounded-full bg-[#B56B45]"></div>
-              <span className="text-sm font-normal text-[#886F68]">
+              <div className="h-1.5 w-1.5 rounded-full bg-nature-brown/40"></div>
+              <span className="text-sm font-normal text-nature-brown/60 font-body">
                 {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
             </h2>
             <JournalEntry onSave={handleSaveEntry} currentDate={currentDate} />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-[#7D5A50]">
+            <h2 className="text-2xl font-semibold mb-5 text-nature-brown font-heading">
               Previous Entries
             </h2>
             <JournalList 
