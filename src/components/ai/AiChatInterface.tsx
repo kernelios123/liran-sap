@@ -2,11 +2,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Leaf, Send } from "lucide-react";
+import { Leaf, Send, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JournalData } from "../journal/JournalEntry";
+import { GeminiMessage, generateGeminiResponse } from "@/utils/geminiApi";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type Message = {
   id: string;
@@ -30,18 +33,11 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [apiKey, setApiKey] = useState<string>(() => {
+    return localStorage.getItem("gemini-api-key") || "";
+  });
+  const [showApiDialog, setShowApiDialog] = useState(!localStorage.getItem("gemini-api-key"));
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Simple responses for demonstration
-  const aiResponses = [
-    "That's interesting. Can you tell me more about that?",
-    "I notice you've mentioned feeling this way before. How is it different now?",
-    "Based on your journal entries, it seems like you're making progress on your goals.",
-    "Have you considered how your daily activities affect your mood?",
-    "Nature can be very healing. Have you spent time outdoors lately?",
-    "What small step could you take today toward one of your missions?",
-    "I remember you mentioned feeling similar things last week. Has anything changed?",
-  ];
 
   useEffect(() => {
     if (selectedEntry) {
@@ -71,7 +67,14 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSendMessage = () => {
+  const handleSaveApiKey = () => {
+    if (apiKey) {
+      localStorage.setItem("gemini-api-key", apiKey);
+      setShowApiDialog(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -83,22 +86,103 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-
-    // Simulate AI typing
     setIsTyping(true);
-    setTimeout(() => {
-      const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+
+    // Convert the conversation history to Gemini format
+    const geminiMessages: GeminiMessage[] = [];
+    
+    // Add system context
+    geminiMessages.push({
+      role: "user",
+      parts: ["You are the Grove Guide, an AI assistant in a journaling app called 'Whispering Grove Journal'. Your role is to help users reflect on their thoughts, feelings, and missions in a calm, nature-inspired way. Be empathetic, thoughtful, and provide gentle guidance. Keep your responses concise but meaningful."]
+    });
+    
+    geminiMessages.push({
+      role: "model",
+      parts: ["I understand my role as the Grove Guide. I'll help users reflect on their journal entries with empathy and thoughtfulness, while keeping a calm, nature-inspired tone. I'm ready to assist."]
+    });
+    
+    // Add entry context if available
+    if (selectedEntry) {
+      const entryContext = `The user has a journal entry from ${selectedEntry.date.toLocaleDateString()}.\n` +
+        (selectedEntry.thoughts ? `Thoughts: ${selectedEntry.thoughts}\n` : "") +
+        (selectedEntry.feelings ? `Feelings: ${selectedEntry.feelings}\n` : "") +
+        (selectedEntry.missions ? `Missions: ${selectedEntry.missions.join(", ")}` : "");
       
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
+      geminiMessages.push({
+        role: "user",
+        parts: ["Here is information about the user's journal entry:\n" + entryContext]
+      });
+      
+      geminiMessages.push({
+        role: "model",
+        parts: ["Thank you for sharing this context about the user's journal entry. I'll use this information to provide more personalized guidance."]
+      });
+    }
+    
+    // Add conversation history (limit to last 10 messages for token limits)
+    const conversationHistory = messages.slice(-10);
+    conversationHistory.forEach(msg => {
+      geminiMessages.push({
+        role: msg.sender === "user" ? "user" : "model",
+        parts: [msg.text]
+      });
+    });
+    
+    // Add the current user message
+    geminiMessages.push({
+      role: "user",
+      parts: [input]
+    });
+
+    try {
+      // If API key is available, use Gemini
+      if (apiKey) {
+        const response = await generateGeminiResponse(geminiMessages, apiKey);
+        
+        const aiMessage: Message = {
+          id: `ai-${Date.now()}`,
+          sender: "ai",
+          text: response,
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, aiMessage]);
+      } else {
+        // Fallback to simple responses if no API key
+        setTimeout(() => {
+          const fallbackResponses = [
+            "I'd love to help more, but I need a valid API key to access my full capabilities. Please set up your Gemini API key.",
+            "To provide more personalized responses, I need a Gemini API key. Please click the key icon to set it up.",
+            "I notice you haven't set up your Gemini API key yet. I can offer much deeper insights once that's configured.",
+          ];
+          
+          const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+          
+          const aiMessage: Message = {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: randomResponse,
+            timestamp: new Date(),
+          };
+          
+          setMessages((prev) => [...prev, aiMessage]);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error generating response:", error);
+      
+      const errorMessage: Message = {
+        id: `ai-error-${Date.now()}`,
         sender: "ai",
-        text: randomResponse,
+        text: "I'm having trouble connecting to my knowledge base. Please check your API key or try again later.",
         timestamp: new Date(),
       };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -109,86 +193,126 @@ export function AiChatInterface({ selectedEntry }: AiChatInterfaceProps) {
   };
 
   return (
-    <Card className="w-full h-[70vh] flex flex-col shadow-md border-nature-sand/30">
-      <CardHeader className="bg-gradient-to-r from-nature-leaf/10 to-nature-sky/5 rounded-t-md">
-        <CardTitle className="flex items-center gap-2">
-          <Leaf className="h-5 w-5 text-nature-leaf" />
-          <span>Grove Guide</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={cn(
-                "flex gap-3 max-w-[80%]",
-                message.sender === "user" ? "ml-auto" : ""
-              )}
-            >
-              {message.sender === "ai" && (
+    <>
+      <Card className="w-full h-[70vh] flex flex-col shadow-md border-nature-sand/30">
+        <CardHeader className="bg-gradient-to-r from-nature-leaf/10 to-nature-sky/5 rounded-t-md flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Leaf className="h-5 w-5 text-nature-leaf" />
+            <span>Grove Guide</span>
+          </CardTitle>
+          <Dialog open={showApiDialog} onOpenChange={setShowApiDialog}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" title="Set Gemini API Key">
+                <Key className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Set Your Gemini API Key</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <p className="text-sm text-muted-foreground">
+                  Enter your Gemini API key to enable AI-powered conversations. 
+                  Your key will be stored locally in your browser.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your Gemini API key"
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSaveApiKey}>Save</Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  You can get a Gemini API key from the{" "}
+                  <a 
+                    href="https://aistudio.google.com/app/apikey" 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-primary underline underline-offset-2"
+                  >
+                    Google AI Studio
+                  </a>
+                </p>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  "flex gap-3 max-w-[80%]",
+                  message.sender === "user" ? "ml-auto" : ""
+                )}
+              >
+                {message.sender === "ai" && (
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/leaf-pattern.svg" />
+                    <AvatarFallback className="bg-nature-leaf/20 text-nature-forest">
+                      <Leaf className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+                <div
+                  className={cn(
+                    "rounded-lg p-3",
+                    message.sender === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  )}
+                >
+                  <p className="text-sm">{message.text}</p>
+                  <span className="text-xs opacity-70 mt-1 block">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/leaf-pattern.svg" />
                   <AvatarFallback className="bg-nature-leaf/20 text-nature-forest">
                     <Leaf className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
-              )}
-              <div
-                className={cn(
-                  "rounded-lg p-3",
-                  message.sender === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                )}
-              >
-                <p className="text-sm">{message.text}</p>
-                <span className="text-xs opacity-70 mt-1 block">
-                  {message.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            </div>
-          ))}
-          {isTyping && (
-            <div className="flex gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-nature-leaf/20 text-nature-forest">
-                  <Leaf className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="bg-muted rounded-lg p-3">
-                <div className="flex gap-1">
-                  <span className="w-2 h-2 rounded-full bg-nature-forest animate-pulse"></span>
-                  <span className="w-2 h-2 rounded-full bg-nature-forest animate-pulse delay-150"></span>
-                  <span className="w-2 h-2 rounded-full bg-nature-forest animate-pulse delay-300"></span>
+                <div className="bg-muted rounded-lg p-3">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-nature-forest animate-pulse"></span>
+                    <span className="w-2 h-2 rounded-full bg-nature-forest animate-pulse delay-150"></span>
+                    <span className="w-2 h-2 rounded-full bg-nature-forest animate-pulse delay-300"></span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 border-t">
-        <div className="flex w-full gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="min-h-[50px] resize-none focus-visible:ring-nature-leaf"
-          />
-          <Button
-            onClick={handleSendMessage}
-            size="icon"
-            className="bg-nature-forest hover:bg-nature-forest/90 h-[50px] w-[50px]"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </CardContent>
+        <CardFooter className="p-4 border-t">
+          <div className="flex w-full gap-2">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message..."
+              className="min-h-[50px] resize-none focus-visible:ring-nature-leaf"
+            />
+            <Button
+              onClick={handleSendMessage}
+              size="icon"
+              className="bg-nature-forest hover:bg-nature-forest/90 h-[50px] w-[50px]"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </>
   );
 }
