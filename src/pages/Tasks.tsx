@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListTodo } from "lucide-react";
+import { ListTodo, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface Task {
   id: string;
@@ -15,6 +17,7 @@ interface Task {
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Load tasks from localStorage
@@ -83,20 +86,51 @@ const TasksPage = () => {
     return groupedTasks;
   };
 
+  const handleClearCompleted = () => {
+    const updatedTasks = tasks.filter(task => !task.completed);
+    setTasks(updatedTasks);
+    localStorage.setItem("journal-tasks", JSON.stringify(updatedTasks));
+    toast({
+      title: "Tasks Cleared",
+      description: "Completed tasks have been removed",
+    });
+  };
+
   const groupedTasks = groupTasksByWeek();
   const sortedWeeks = Object.keys(groupedTasks).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  
+  const completedCount = tasks.filter(t => t.completed).length;
+  const totalCount = tasks.length;
 
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-4xl font-semibold text-[#7D5A50] flex items-center gap-3">
-            <ListTodo className="h-8 w-8 text-[#B56B45]" />
-            Weekly Missions
-          </h1>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-4xl font-semibold text-[#7D5A50] flex items-center gap-3">
+              <ListTodo className="h-8 w-8 text-[#B56B45]" />
+              Weekly Missions
+            </h1>
+            {totalCount > 0 && completedCount > 0 && (
+              <button
+                onClick={handleClearCompleted}
+                className="text-sm text-[#B56B45] hover:text-[#C87C56] transition-colors"
+              >
+                Clear Completed
+              </button>
+            )}
+          </div>
           <p className="text-lg text-[#886F68] mt-2">
             Track your weekly goals and missions from your journal entries
           </p>
+          {totalCount > 0 && (
+            <div className="mt-4 bg-[#F7F3EE] p-3 rounded-lg shadow-sm">
+              <p className="text-[#7D5A50] flex items-center gap-2">
+                <Save className="h-4 w-4 text-[#B56B45]" />
+                <span>Progress: {completedCount}/{totalCount} tasks completed</span>
+              </p>
+            </div>
+          )}
         </header>
 
         <div className="space-y-8">
@@ -114,6 +148,9 @@ const TasksPage = () => {
               const weekEnd = new Date(weekKey);
               weekEnd.setDate(weekStart.getDate() + 6);
               
+              const weekTasks = groupedTasks[weekKey];
+              const completedWeekTasks = weekTasks.filter(t => t.completed).length;
+              
               return (
                 <Card key={weekKey} className="border-[#D4B996]/40 shadow-md overflow-hidden">
                   <CardHeader className="bg-gradient-to-r from-[#D4B996]/30 to-[#B6C199]/20 py-4">
@@ -123,14 +160,14 @@ const TasksPage = () => {
                         {weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                       <Badge variant="outline" className="bg-white/50">
-                        {groupedTasks[weekKey].filter(t => t.completed).length}/{groupedTasks[weekKey].length} completed
+                        {completedWeekTasks}/{weekTasks.length} completed
                       </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
                     <ScrollArea className="h-full max-h-[320px] pr-4">
                       <ul className="space-y-3">
-                        {groupedTasks[weekKey].map((task) => (
+                        {weekTasks.map((task) => (
                           <li key={task.id} className="flex items-start gap-3 p-2 hover:bg-[#F7F3EE] rounded-md transition-colors">
                             <Checkbox
                               id={task.id}

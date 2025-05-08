@@ -1,11 +1,13 @@
+
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Pencil } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Leaf, Pencil, ListTodo } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 type JournalEntryProps = {
   onSave: (data: JournalData) => void;
@@ -24,8 +26,10 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
   const [feelings, setFeelings] = useState("");
   const [missions, setMissions] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSave = () => {
+    // Don't require content if only missions were entered
     if (!thoughts && !feelings && !missions) {
       toast({
         title: "Empty Entry",
@@ -35,36 +39,38 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
       return;
     }
 
-    // Save the entry
-    const journalData = {
-      date: currentDate,
-      thoughts,
-      feelings,
-      missions,
-    };
-    
-    onSave(journalData);
-    
-    // Process missions for tasks if missions are provided
-    // We'll handle this in a separate step, not directly in the onSave
-    if (missions && missions.trim() !== "") {
-      processMissionsAsTasks(missions, currentDate);
+    // Only save journal entry if there are thoughts or feelings
+    if (thoughts || feelings) {
+      // Save the entry without missions (they go to tasks)
+      const journalData = {
+        date: currentDate,
+        thoughts,
+        feelings,
+        missions: "", // Don't save missions in journal entries
+      };
+      
+      onSave(journalData);
+      
+      toast({
+        title: "Entry Saved",
+        description: "Your journal entry has been saved",
+        action: (
+          <div className="h-8 w-8 bg-[#D4B996]/20 rounded-full flex items-center justify-center">
+            <Leaf className="h-4 w-4 text-[#B56B45]" />
+          </div>
+        ),
+      });
+      
+      // Clear thoughts and feelings after saving
+      setThoughts("");
+      setFeelings("");
     }
 
-    toast({
-      title: "Entry Saved",
-      description: "Your journal entry has been saved",
-      action: (
-        <div className="h-8 w-8 bg-[#D4B996]/20 rounded-full flex items-center justify-center">
-          <Leaf className="h-4 w-4 text-[#B56B45]" />
-        </div>
-      ),
-    });
-
-    // Clear form after saving
-    setThoughts("");
-    setFeelings("");
-    setMissions("");
+    // Process missions separately if provided
+    if (missions && missions.trim() !== "") {
+      processMissionsAsTasks(missions, currentDate);
+      setMissions(""); // Clear missions after processing
+    }
   };
   
   const processMissionsAsTasks = (missionText: string, date: Date) => {
@@ -103,13 +109,28 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
     // Save back to localStorage
     localStorage.setItem("journal-tasks", JSON.stringify(allTasks));
     
-    // Show notification if tasks were added
+    // Show notification and navigate to tasks page
     if (newTasks.length > 0) {
       toast({
         title: "Tasks Created",
         description: `${newTasks.length} mission${newTasks.length > 1 ? 's' : ''} added to your tasks list`,
       });
+      navigate("/tasks");
     }
+  };
+
+  const handleMissionsSubmit = () => {
+    if (!missions || missions.trim() === "") {
+      toast({
+        title: "No Missions",
+        description: "Please write at least one mission before adding",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    processMissionsAsTasks(missions, currentDate);
+    setMissions("");
   };
 
   return (
@@ -168,12 +189,19 @@ export function JournalEntry({ onSave, currentDate }: JournalEntryProps) {
             <Textarea
               placeholder="What are your missions for this week? Add one mission per line to create tasks automatically."
               className={cn(
-                "min-h-[320px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
+                "min-h-[280px] resize-none focus-visible:ring-[#C87C56] text-lg p-4",
                 "bg-white/70 border-[#D4B996]/30 shadow-inner rounded-md"
               )}
               value={missions}
               onChange={(e) => setMissions(e.target.value)}
             />
+            <Button 
+              onClick={handleMissionsSubmit} 
+              className="mt-4 bg-[#B56B45] hover:bg-[#C87C56] shadow-md transition-all hover:translate-y-[-2px] text-white font-medium px-6 py-5 text-base flex items-center gap-2"
+            >
+              <ListTodo className="h-5 w-5" />
+              Add to Tasks
+            </Button>
           </TabsContent>
         </Tabs>
       </CardContent>

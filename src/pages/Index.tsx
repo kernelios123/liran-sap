@@ -35,11 +35,14 @@ const JournalPage = () => {
   }, [entries]);
 
   const handleSaveEntry = (data: JournalData) => {
-    setEntries((prev) => [data, ...prev]);
-    toast({
-      title: "Entry saved",
-      description: "Your journal entry has been saved successfully.",
-    });
+    // Only save if there's actual content (thoughts or feelings)
+    if (data.thoughts || data.feelings) {
+      setEntries((prev) => [data, ...prev]);
+      toast({
+        title: "Entry saved",
+        description: "Your journal entry has been saved successfully.",
+      });
+    }
   };
 
   const handleDeleteEntry = (entryToDelete: JournalData) => {
